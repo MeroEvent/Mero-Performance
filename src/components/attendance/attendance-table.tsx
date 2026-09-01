@@ -17,7 +17,9 @@ import {
   User, 
   FileSpreadsheet, 
   ChevronLeft, 
-  ChevronRight
+  ChevronRight,
+  Layers,
+  Clock
 } from 'lucide-react';
 
 interface AttendanceTableProps {
