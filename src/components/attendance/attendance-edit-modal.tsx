@@ -36,8 +36,9 @@ export const AttendanceEditModal: React.FC<AttendanceEditModalProps> = ({
   );
   const [reason, setReason] = useState<string>('');
   const [error, setError] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
       setError('A mandatory reason is required for attendance adjustments.');
@@ -45,47 +46,62 @@ export const AttendanceEditModal: React.FC<AttendanceEditModalProps> = ({
     }
 
     try {
+      setIsSubmitting(true);
+      setError('');
       const recordDate = record.date;
-      const newCheckIn = new Date(`${recordDate}T${checkInTime}:00`);
-      const newCheckOut = checkOutTime ? new Date(`${recordDate}T${checkOutTime}:00`) : null;
-      const hours = newCheckOut ? calculateHoursWorked(newCheckIn, newCheckOut) : 0;
+      const newCheckIn = checkInTime ? new Date(`${recordDate}T${checkInTime}:00`).toISOString() : null;
+      const newCheckOut = checkOutTime ? new Date(`${recordDate}T${checkOutTime}:00`).toISOString() : null;
+      const hours = newCheckIn && newCheckOut ? calculateHoursWorked(newCheckIn, newCheckOut) : 0;
 
-      const updatedRecords = AttendanceService.getRecords().map((r) => {
-        if (r.id === record.id) {
-          return {
-            ...r,
-            status,
-            check_in_time: newCheckIn.toISOString(),
-            check_out_time: newCheckOut ? newCheckOut.toISOString() : null,
-            total_hours: hours,
-            edited_by: editorId,
-            edit_reason: reason.trim(),
-            updated_at: new Date().toISOString(),
-          };
-        }
-        return r;
+      // 1. Call real backend API to persist in Supabase and write to audit_logs
+      const res = await fetch('/api/attendance', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recordId: record.id,
+          status,
+          checkInTime: newCheckIn,
+          checkOutTime: newCheckOut,
+          totalHours: hours,
+          reason: reason.trim(),
+          editorId,
+          editorName,
+        }),
       });
 
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('mero_attendance_records_v1', JSON.stringify(updatedRecords));
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Failed to update attendance record');
       }
 
-      // Log Audit Entry
-      AuditService.addLog({
-        entity_type: 'attendance',
-        entity_id: record.id,
-        action: 'override',
-        changed_by: editorId,
-        changed_by_name: editorName,
-        old_value: JSON.stringify({ status: record.status, hours: record.total_hours }),
-        new_value: JSON.stringify({ status, hours, reason: reason.trim() }),
-        reason: reason.trim(),
-      });
+      // 2. Also sync local store for instant client cache
+      try {
+        const updatedRecords = AttendanceService.getRecords().map((r) => {
+          if (r.id === record.id) {
+            return {
+              ...r,
+              status,
+              check_in_time: newCheckIn,
+              check_out_time: newCheckOut,
+              total_hours: hours,
+              edited_by: editorId,
+              edit_reason: reason.trim(),
+              updated_at: new Date().toISOString(),
+            };
+          }
+          return r;
+        });
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('mero_attendance_records_v1', JSON.stringify(updatedRecords));
+        }
+      } catch {}
 
       onRecordUpdated();
       onClose();
     } catch (err: any) {
       setError(err.message || 'Failed to update attendance record');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -164,11 +180,11 @@ export const AttendanceEditModal: React.FC<AttendanceEditModalProps> = ({
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" size="sm" onClick={onClose}>
+          <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type="submit" variant="primary" size="sm">
-            Save Adjustment
+          <Button type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving Adjustment...' : 'Save Adjustment'}
           </Button>
         </div>
       </form>
