@@ -9,18 +9,11 @@ import { AuditLogEntry } from '@/types';
 import { formatDateDisplay } from '@/lib/utils/attendance';
 import { 
   ShieldCheck, 
-  Filter, 
   Search, 
-  Clock, 
   ChevronLeft, 
   ChevronRight, 
-  Layers, 
-  Activity, 
   RefreshCw, 
-  FileText,
-  User,
-  Sliders,
-  Calendar
+  User
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
