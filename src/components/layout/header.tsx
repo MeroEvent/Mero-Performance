@@ -104,7 +104,7 @@ export const Header: React.FC<HeaderProps> = ({ currentUser, onOpenMobileMenu })
   const profileHref = currentUser.role === 'admin' ? '/admin/settings' : '/employee/profile';
 
   return (
-    <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between sticky top-0 z-20 transition-colors duration-200">
+    <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-3 sm:px-6 flex items-center justify-between shrink-0 z-20 transition-colors duration-200">
       {/* Left: Mobile Hamburger + Date/Clock */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Mobile Hamburger Menu Button */}

@@ -277,7 +277,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, isOpenMobile = false, on
   return (
     <>
       {/* Desktop Sidebar (Fixed) */}
-      <aside className="hidden md:flex w-64 border-r border-slate-200 dark:border-slate-800 flex-col h-screen sticky top-0 z-30 shrink-0 transition-colors duration-200">
+      <aside className="hidden md:flex w-64 border-r border-slate-200 dark:border-slate-800 flex-col h-full shrink-0 transition-colors duration-200">
         {sidebarContent}
       </aside>
 
