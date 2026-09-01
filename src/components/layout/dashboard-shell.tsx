@@ -76,7 +76,7 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({ children, hideSi
   const activeNavItems = currentUser.role === 'admin' ? adminNavItems : staffNavItems;
 
   return (
-    <div className="min-h-screen flex bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased select-none">
+    <div className="h-screen flex overflow-hidden bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased select-none">
       {/* Sidebar with Mobile Slide-Over Support */}
       {!hideSidebar && (
         <Sidebar
@@ -88,12 +88,12 @@ export const DashboardShell: React.FC<DashboardShellProps> = ({ children, hideSi
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-8">
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
           currentUser={currentUser}
           onOpenMobileMenu={() => setMobileMenuOpen(true)}
         />
-        <main className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto max-w-7xl w-full mx-auto space-y-4 sm:space-y-6 md:space-y-8">
+        <main className="flex-1 p-3 sm:p-6 md:p-8 overflow-y-auto max-w-7xl w-full mx-auto space-y-4 sm:space-y-6 md:space-y-8 pb-28 md:pb-12">
           {children}
         </main>
       </div>
