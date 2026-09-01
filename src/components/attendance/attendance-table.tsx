@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { AttendanceRecord, AttendanceStatus } from '@/types';
+import { AttendanceRecord } from '@/types';
 import { formatDateDisplay, formatTime } from '@/lib/utils/attendance';
 import { StatusBadge } from '@/components/ui/badge';
 import { exportAttendanceToPDF, exportAttendanceToCSV } from '@/lib/utils/export';
@@ -10,24 +10,14 @@ import { AttendanceEditModal } from '@/components/attendance/attendance-edit-mod
 import { useAuth } from '@/lib/context/auth-context';
 import { 
   Search, 
-  Filter, 
   Calendar, 
   Edit3, 
   Download, 
   MapPin, 
-  Clock, 
   User, 
-  Building2, 
   FileSpreadsheet, 
   ChevronLeft, 
-  ChevronRight,
-  Laptop,
-  Smartphone,
-  CheckCircle2,
-  AlertCircle,
-  XCircle,
-  Layers,
-  ArrowUpDown
+  ChevronRight
 } from 'lucide-react';
 
 interface AttendanceTableProps {
@@ -176,13 +166,13 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               statusFilter === 'all'
-                ? 'bg-blue-600 text-white shadow-sm'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
             }`}
           >
             <span>All</span>
-            <span className={`px-1.5 py-0.2 rounded-md text-[10px] font-mono ${
-              statusFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+              statusFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
               {statusCounts.all}
             </span>
@@ -192,12 +182,14 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             onClick={() => { setStatusFilter('on_time'); setCurrentPage(1); }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               statusFilter === 'on_time'
-                ? 'bg-emerald-600 text-white shadow-sm'
-                : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
             }`}
           >
             <span>Present</span>
-            <span className="px-1.5 py-0.2 rounded-md text-[10px] font-mono bg-emerald-500/20">
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+              statusFilter === 'on_time' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
               {statusCounts.on_time}
             </span>
           </button>
@@ -206,12 +198,14 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             onClick={() => { setStatusFilter('late'); setCurrentPage(1); }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               statusFilter === 'late'
-                ? 'bg-amber-600 text-white shadow-sm'
-                : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
             }`}
           >
             <span>Late</span>
-            <span className="px-1.5 py-0.2 rounded-md text-[10px] font-mono bg-amber-500/20">
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+              statusFilter === 'late' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
               {statusCounts.late + statusCounts.very_late}
             </span>
           </button>
@@ -220,12 +214,14 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             onClick={() => { setStatusFilter('absent'); setCurrentPage(1); }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               statusFilter === 'absent'
-                ? 'bg-rose-600 text-white shadow-sm'
-                : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 hover:bg-rose-500/20'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
             }`}
           >
             <span>Absent</span>
-            <span className="px-1.5 py-0.2 rounded-md text-[10px] font-mono bg-rose-500/20">
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+              statusFilter === 'absent' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
               {statusCounts.absent}
             </span>
           </button>
@@ -234,12 +230,14 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             onClick={() => { setStatusFilter('on_leave'); setCurrentPage(1); }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               statusFilter === 'on_leave'
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'bg-purple-500/10 text-purple-700 dark:text-purple-300 hover:bg-purple-500/20'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
             }`}
           >
             <span>Leave</span>
-            <span className="px-1.5 py-0.2 rounded-md text-[10px] font-mono bg-purple-500/20">
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+              statusFilter === 'on_leave' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
               {statusCounts.on_leave}
             </span>
           </button>
