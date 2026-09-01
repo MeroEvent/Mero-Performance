@@ -43,7 +43,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
   const [employee, setEmployee] = useState<any | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [viewMode, setViewMode] = useState<'official_sheet' | 'table_view'>('official_sheet');
+  const [viewMode, setViewMode] = useState<'table_view' | 'official_sheet'>('table_view');
 
   const loadEmployeeData = async () => {
     try {
