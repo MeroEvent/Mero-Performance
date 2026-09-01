@@ -4,28 +4,19 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect, use } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
-import { OfficialAttendanceSheet } from '@/components/reports/official-attendance-sheet';
 import { AttendanceTable } from '@/components/attendance/attendance-table';
 import { AttendanceRecord } from '@/types';
 import { exportAttendanceToPDF } from '@/lib/utils/export';
 import { 
   ArrowLeft, 
   Download, 
-  Printer, 
-  Clock, 
   Building2, 
   Mail, 
   Phone, 
   CheckCircle, 
   XCircle, 
-  Calendar, 
-  User, 
   Loader2, 
-  FileSpreadsheet, 
-  BarChart3,
-  ShieldCheck,
   Briefcase
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -38,12 +29,10 @@ interface EmployeeDetailPageProps {
 export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) {
   const resolvedParams = use(params);
   const employeeId = resolvedParams.id;
-  const router = useRouter();
 
   const [employee, setEmployee] = useState<any | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [viewMode, setViewMode] = useState<'table_view' | 'official_sheet'>('table_view');
 
   const loadEmployeeData = async () => {
     try {
@@ -137,30 +126,6 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
         </Link>
 
         <div className="flex items-center gap-2">
-          {/* View Mode Toggle */}
-          <div className="flex items-center bg-slate-200/80 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
-            <button
-              onClick={() => setViewMode('official_sheet')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                viewMode === 'official_sheet'
-                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-              }`}
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5" /> Official Sheet
-            </button>
-            <button
-              onClick={() => setViewMode('table_view')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                viewMode === 'table_view'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
-              }`}
-            >
-              <BarChart3 className="w-3.5 h-3.5" /> Table Log
-            </button>
-          </div>
-
           {/* Prominent Download Button */}
           <Button
             variant="primary"
@@ -252,48 +217,33 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
       </div>
 
       {/* Main Attendance Section */}
-      {viewMode === 'official_sheet' ? (
-        /* Official College / Academic Document Format */
-        <div className="space-y-4">
-          <OfficialAttendanceSheet
-            records={records}
-            employeeName={employee.name}
-            departmentName={employee.department_name || 'Information Tech'}
-            position={employee.position || 'Team Member'}
-            companyName="Mero Company Pvt. Ltd."
-          />
+      <div className="space-y-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Card className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Days Present</p>
+            <h3 className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{totalPresent}</h3>
+          </Card>
+          <Card className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Late</p>
+            <h3 className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{totalLate}</h3>
+          </Card>
+          <Card className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Absent</p>
+            <h3 className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{totalAbsent}</h3>
+          </Card>
+          <Card className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Hours</p>
+            <h3 className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{totalHours.toFixed(1)}h</h3>
+          </Card>
         </div>
 
-      ) : (
-        /* Standard Data Table */
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <Card className="border-l-4 border-l-emerald-500">
-              <p className="text-xs font-semibold text-slate-400 uppercase">Days Present</p>
-              <h3 className="text-2xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{totalPresent}</h3>
-            </Card>
-            <Card className="border-l-4 border-l-amber-500">
-              <p className="text-xs font-semibold text-slate-400 uppercase">Tardiness / Late</p>
-              <h3 className="text-2xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{totalLate}</h3>
-            </Card>
-            <Card className="border-l-4 border-l-rose-500">
-              <p className="text-xs font-semibold text-slate-400 uppercase">Absent</p>
-              <h3 className="text-2xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{totalAbsent}</h3>
-            </Card>
-            <Card className="border-l-4 border-l-indigo-500">
-              <p className="text-xs font-semibold text-slate-400 uppercase">Total Hours</p>
-              <h3 className="text-2xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{totalHours.toFixed(1)}h</h3>
-            </Card>
-          </div>
-
-          <AttendanceTable
-            records={records}
-            title={`${employee.name}'s Attendance Records`}
-            showEmployeeDetails={false}
-            onRefresh={loadEmployeeData}
-          />
-        </div>
-      )}
+        <AttendanceTable
+          records={records}
+          title={`${employee.name}'s Attendance Records`}
+          showEmployeeDetails={false}
+          onRefresh={loadEmployeeData}
+        />
+      </div>
     </DashboardShell>
   );
 }
