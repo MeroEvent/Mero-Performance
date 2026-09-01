@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { exportAttendanceToPDF } from '@/lib/utils/export';
 
 export default function EmployeeHistoryPage() {
-  const { user, profile } = useAuth();
+  const { profile } = useAuth();
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [activeTab, setActiveTab] = useState<'calendar' | 'table'>('calendar');
   const [isLoading, setIsLoading] = useState<boolean>(true);
