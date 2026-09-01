@@ -9,6 +9,7 @@ import { AttendanceRecord } from '@/types';
 import { AttendanceCalendar } from '@/components/attendance/attendance-calendar';
 import { AttendanceTable } from '@/components/attendance/attendance-table';
 import { Calendar as CalendarIcon, List, Download, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { exportAttendanceToPDF } from '@/lib/utils/export';
 
 export default function EmployeeHistoryPage() {
