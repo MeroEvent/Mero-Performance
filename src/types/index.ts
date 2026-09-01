@@ -145,6 +145,7 @@ export interface AttendanceRecord {
   user_name?: string;
   user_email?: string;
   department_name?: string;
+  shift_name?: string | null;
   created_at: string;
   updated_at: string;
 }
