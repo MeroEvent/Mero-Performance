@@ -54,16 +54,23 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
   const statusCounts = useMemo(() => {
     const counts: Record<string, number> = {
       all: records.length,
-      on_time: 0,
+      present: 0,
       late: 0,
-      very_late: 0,
       absent: 0,
       on_leave: 0,
       holiday: 0,
     };
     records.forEach((r) => {
-      if (counts[r.status] !== undefined) {
-        counts[r.status]++;
+      if (['on_time', 'present'].includes(r.status)) {
+        counts.present++;
+      } else if (['late', 'very_late'].includes(r.status)) {
+        counts.late++;
+      } else if (r.status === 'absent') {
+        counts.absent++;
+      } else if (['on_leave', 'leave'].includes(r.status)) {
+        counts.on_leave++;
+      } else if (r.status === 'holiday') {
+        counts.holiday++;
       }
     });
     return counts;
@@ -80,7 +87,18 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
         (rec.date || '').includes(searchLower) ||
         (rec.notes || '').toLowerCase().includes(searchLower);
 
-      const matchesStatus = statusFilter === 'all' || rec.status === statusFilter;
+      let matchesStatus = true;
+      if (statusFilter === 'present') {
+        matchesStatus = ['on_time', 'present'].includes(rec.status);
+      } else if (statusFilter === 'late') {
+        matchesStatus = ['late', 'very_late'].includes(rec.status);
+      } else if (statusFilter === 'absent') {
+        matchesStatus = rec.status === 'absent';
+      } else if (statusFilter === 'on_leave') {
+        matchesStatus = ['on_leave', 'leave'].includes(rec.status);
+      } else if (statusFilter === 'holiday') {
+        matchesStatus = rec.status === 'holiday';
+      }
 
       return matchesSearch && matchesStatus;
     });
@@ -107,7 +125,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
   return (
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 sm:p-6 shadow-sm space-y-5">
-      {/* Top Header & Export Controls */}
+      {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2.5">
@@ -123,25 +141,6 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
               </p>
             </div>
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCSV}
-            className="text-xs font-bold gap-1.5 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
-          >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" /> Export CSV
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={handleExportPDF}
-            className="text-xs font-bold gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/20"
-          >
-            <Download className="w-3.5 h-3.5" /> Download PDF
-          </Button>
         </div>
       </div>
 
@@ -181,18 +180,18 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
           </button>
 
           <button
-            onClick={() => { setStatusFilter('on_time'); setCurrentPage(1); }}
+            onClick={() => { setStatusFilter('present'); setCurrentPage(1); }}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'on_time'
+              statusFilter === 'present'
                 ? 'bg-blue-600 text-white shadow-sm font-extrabold'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
             }`}
           >
             <span>Present</span>
             <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-              statusFilter === 'on_time' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+              statusFilter === 'present' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
-              {statusCounts.on_time}
+              {statusCounts.present}
             </span>
           </button>
 
@@ -208,7 +207,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
             <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
               statusFilter === 'late' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
-              {statusCounts.late + statusCounts.very_late}
+              {statusCounts.late}
             </span>
           </button>
 
@@ -241,6 +240,22 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
               statusFilter === 'on_leave' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
             }`}>
               {statusCounts.on_leave}
+            </span>
+          </button>
+
+          <button
+            onClick={() => { setStatusFilter('holiday'); setCurrentPage(1); }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              statusFilter === 'holiday'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
+            }`}
+          >
+            <span>Holiday</span>
+            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+              statusFilter === 'holiday' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+            }`}>
+              {statusCounts.holiday}
             </span>
           </button>
         </div>

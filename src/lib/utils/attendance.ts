@@ -170,17 +170,19 @@ export function formatDateDisplay(dateVal: string | Date): string {
 /**
  * Returns color tokens and human label for an attendance status.
  */
-export function getStatusBadge(status: AttendanceStatus) {
+export function getStatusBadge(status: AttendanceStatus | string) {
   switch (status) {
     case 'on_time':
+    case 'present':
       return {
         bg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
         text: 'text-emerald-700 dark:text-emerald-400',
         border: 'border-emerald-500/30',
         dot: 'bg-emerald-500',
-        label: 'On Time',
+        label: 'Present',
       };
     case 'late':
+    case 'very_late':
       return {
         bg: 'bg-amber-500/10 dark:bg-amber-500/20',
         text: 'text-amber-700 dark:text-amber-400',
@@ -188,44 +190,37 @@ export function getStatusBadge(status: AttendanceStatus) {
         dot: 'bg-amber-500',
         label: 'Late',
       };
-    case 'very_late':
+    case 'half_day':
+      return {
+        bg: 'bg-indigo-500/10 dark:bg-indigo-500/20',
+        text: 'text-indigo-700 dark:text-indigo-400',
+        border: 'border-indigo-500/30',
+        dot: 'bg-indigo-500',
+        label: 'Half Day',
+      };
+    case 'absent':
       return {
         bg: 'bg-rose-500/10 dark:bg-rose-500/20',
         text: 'text-rose-700 dark:text-rose-400',
         border: 'border-rose-500/30',
         dot: 'bg-rose-500',
-        label: 'Very Late',
+        label: 'Absent',
       };
-    case 'half_day':
+    case 'on_leave':
+    case 'leave':
       return {
         bg: 'bg-blue-500/10 dark:bg-blue-500/20',
         text: 'text-blue-700 dark:text-blue-400',
         border: 'border-blue-500/30',
         dot: 'bg-blue-500',
-        label: 'Half Day',
+        label: 'On Leave',
       };
-    case 'absent':
-      return {
-        bg: 'bg-slate-500/10 dark:bg-slate-500/20',
-        text: 'text-slate-700 dark:text-slate-400',
-        border: 'border-slate-500/30',
-        dot: 'bg-slate-500',
-        label: 'Absent',
-      };
-    case 'on_leave':
+    case 'holiday':
       return {
         bg: 'bg-purple-500/10 dark:bg-purple-500/20',
         text: 'text-purple-700 dark:text-purple-400',
         border: 'border-purple-500/30',
         dot: 'bg-purple-500',
-        label: 'On Leave',
-      };
-    case 'holiday':
-      return {
-        bg: 'bg-teal-500/10 dark:bg-teal-500/20',
-        text: 'text-teal-700 dark:text-teal-400',
-        border: 'border-teal-500/30',
-        dot: 'bg-teal-500',
         label: 'Holiday',
       };
     default:

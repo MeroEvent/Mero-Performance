@@ -3,8 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   calculateCheckInStatus, 
   calculateHoursWorked, 
-  evaluateWorkdayStatus,
-  getNepalDateString,
+  getNepalDateString, 
   getNepalTimeString 
 } from '@/lib/utils/attendance';
 import { isIpAllowed, isLoopbackIp, normalizeIpAddress } from '@/lib/utils/network';
@@ -201,19 +200,39 @@ export async function GET(req: NextRequest) {
       .limit(1)
       .maybeSingle();
 
-    if (openRecord) {
-      return NextResponse.json({ record: openRecord });
-    }
+    // 2. Otherwise get today's record and status metadata
+    const [recordRes, holidayRes, leaveRes] = await Promise.all([
+      supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('date', date)
+        .maybeSingle(),
+      supabase
+        .from('holidays')
+        .select('*')
+        .eq('date', date)
+        .maybeSingle(),
+      supabase
+        .from('leave_requests')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'approved')
+        .lte('start_date', date)
+        .gte('end_date', date)
+        .maybeSingle(),
+    ]);
 
-    // 2. Otherwise get today's record
-    const { data: record } = await supabase
-      .from('attendance_records')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('date', date)
-      .maybeSingle();
+    const [dYear, dMonth, dDay] = date.split('-').map(Number);
+    const dayOfWeek = new Date(Date.UTC(dYear, dMonth - 1, dDay)).getUTCDay();
+    const isWeekend = dayOfWeek === 6;
 
-    return NextResponse.json({ record: record || null });
+    return NextResponse.json({ 
+      record: openRecord || recordRes.data || null,
+      holiday: holidayRes.data || null,
+      isWeekend,
+      approvedLeave: leaveRes.data || null,
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to fetch attendance' }, { status: 500 });
   }
@@ -236,8 +255,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // A. Parallelize all initial database reads into 1 single round-trip
-    const [profileRes, rulesRes, locsRes, existingTodayRes, unclosedRes] = await Promise.all([
+    // A. Parallelize all initial database reads into 1 single round-trip (including Holiday & Leave checks)
+    const [profileRes, rulesRes, locsRes, existingTodayRes, unclosedRes, holidayRes, leaveRes] = await Promise.all([
       supabase
         .from('user_profiles')
         .select('*, shift:shifts(*)')
@@ -264,11 +283,62 @@ export async function POST(req: NextRequest) {
         .is('check_out_time', null)
         .limit(1)
         .maybeSingle(),
+      supabase
+        .from('holidays')
+        .select('*')
+        .eq('date', todayStr)
+        .maybeSingle(),
+      supabase
+        .from('leave_requests')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'approved')
+        .lte('start_date', todayStr)
+        .gte('end_date', todayStr)
+        .maybeSingle(),
     ]);
 
     const userProfile = profileRes.data;
     if (profileRes.error || !userProfile) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+    }
+
+    // B. HOLIDAY, WEEKEND & APPROVED LEAVE GUARDS
+    const todayHoliday = holidayRes.data;
+    if (todayHoliday) {
+      return NextResponse.json(
+        {
+          error: `Check-in Blocked: Today is an official public holiday (${todayHoliday.name}). Office is closed and attendance check-in is not permitted.`,
+          isHolidayError: true,
+          holidayName: todayHoliday.name,
+        },
+        { status: 403 }
+      );
+    }
+
+    const [tYear, tMonth, tDay] = todayStr.split('-').map(Number);
+    const dayOfWeek = new Date(Date.UTC(tYear, tMonth - 1, tDay)).getUTCDay();
+    const isSaturday = dayOfWeek === 6;
+    if (isSaturday) {
+      return NextResponse.json(
+        {
+          error: 'Check-in Blocked: Today is Saturday (Weekly Off). Office is closed and attendance check-in is not permitted.',
+          isWeekendError: true,
+        },
+        { status: 403 }
+      );
+    }
+
+    const approvedLeave = leaveRes.data;
+    if (approvedLeave) {
+      return NextResponse.json(
+        {
+          error: `Check-in Blocked: You have an approved ${approvedLeave.leave_type.toUpperCase()} leave scheduled for today. You are excused from office check-in.`,
+          isLeaveError: true,
+          leaveType: approvedLeave.leave_type,
+        },
+        { status: 403 }
+      );
     }
 
     const companyRules = rulesRes.data;
@@ -327,7 +397,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // C2. ANTI-PROXY / BUDDY PUNCHING DEVICE & HARDWARE GUARD
     // Check if Single Device Policy is enabled in Company Rules (stored in Supabase DB)
     const rawAllowedIps: string[] = Array.isArray(companyRules?.allowed_ips) ? companyRules.allowed_ips : [];
     const isSingleDevicePolicyActive = !rawAllowedIps.includes('__CONFIG__:ALLOW_SHARED_DEVICE');
