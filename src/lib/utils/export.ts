@@ -89,7 +89,7 @@ export function exportAttendanceToPDF(
   };
 
   const rows = records
-    .map((r, index) => {
+    .map((r) => {
       const isHoliday = r.status === 'holiday';
       const isLeave = r.status === 'on_leave';
       const isPresent = r.status === 'on_time';
