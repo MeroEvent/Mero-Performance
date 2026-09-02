@@ -10,7 +10,6 @@ import type {
   CompanyRules,
   AttendanceStatus,
   AttendanceSummaryStats,
-  TeamOverviewStats,
   AdminOverviewStats,
 } from '@/types';
 
@@ -434,7 +433,7 @@ export const shiftService = {
   async getAll(companyId?: string): Promise<any[]> {
     const cid = companyId || 'c0000000-0000-0000-0000-000000000001';
     try {
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('shifts')
         .select('*')
         .eq('company_id', cid)
@@ -459,7 +458,7 @@ export const shiftService = {
   async getActive(companyId?: string): Promise<any[]> {
     const cid = companyId || 'c0000000-0000-0000-0000-000000000001';
     try {
-      let { data, error } = await supabase
+      const { data, error } = await supabase
         .from('shifts')
         .select('*')
         .eq('company_id', cid)
