@@ -10,6 +10,7 @@ interface ModalProps {
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl';
   maxWidth?: string;
+  className?: string;
 }
 
 export const Modal: React.FC<ModalProps> = ({ 
@@ -19,6 +20,7 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   size = 'lg',
   maxWidth,
+  className = '',
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,7 +52,7 @@ export const Modal: React.FC<ModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/65 backdrop-blur-sm animate-fadeIn">
       <div
-        className={`relative w-full ${chosenWidth} bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 transform scale-100 flex flex-col max-h-[90vh]`}
+        className={`relative w-full ${chosenWidth} bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 transform scale-100 flex flex-col max-h-[90vh] ${className}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800 shrink-0">
