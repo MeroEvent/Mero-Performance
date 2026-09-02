@@ -4,59 +4,120 @@ export const dynamic = 'force-dynamic';
 
 import React, { useState, useEffect } from 'react';
 import { DashboardShell } from '@/components/layout/dashboard-shell';
-import { AttendanceService } from '@/lib/services/attendance-store';
-import { LeaveService } from '@/lib/services/leave-store';
-import { UserProfile, LeaveRequest } from '@/types';
+import { useAuth } from '@/lib/context/auth-context';
+import { LeaveRequest } from '@/types';
 import { LeaveTable } from '@/components/leave/leave-table';
 import { Card } from '@/components/ui/card';
-import { Clock, CheckCircle2, XCircle, Calendar } from 'lucide-react';
+import { Clock, CheckCircle2, XCircle, Loader2, AlertCircle } from 'lucide-react';
 
 export default function ManagerLeavePage() {
-  const [currentUser] = useState<UserProfile>(() => AttendanceService.getCurrentUser());
-  const [pendingRequests, setPendingRequests] = useState<LeaveRequest[]>([]);
-  const [allRequests, setAllRequests] = useState<LeaveRequest[]>([]);
+  const { profile, isLoading: authLoading } = useAuth();
+  const [requests, setRequests] = useState<LeaveRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const loadData = () => {
-    const pending = LeaveService.getPendingRequests(currentUser.id);
-    const all = LeaveService.getLeaveRequests().filter(
-      (r) => r.reviewer_id === currentUser.id || r.status !== 'pending'
-    );
-    setPendingRequests(pending);
-    setAllRequests(all);
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
+      setErrorMsg('');
+      const res = await fetch('/api/admin/leave');
+      const data = await res.json();
+      if (res.ok && data.requests) {
+        setRequests(data.requests);
+      } else {
+        setErrorMsg(data.error || 'Failed to fetch team leave requests');
+      }
+    } catch (err: any) {
+      console.error('Failed to load admin leaves:', err);
+      setErrorMsg(err.message || 'Error connecting to leave service');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
     loadData();
-  }, [currentUser]);
+  }, []);
 
-  const handleApprove = (id: string) => {
-    LeaveService.reviewLeaveRequest(id, currentUser.id, 'approved', 'Approved by manager');
-    loadData();
+  const handleApprove = async (id: string) => {
+    if (!profile?.id) return;
+    try {
+      const res = await fetch('/api/admin/leave', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: id,
+          action: 'approved',
+          reviewerId: profile.id,
+          reviewerComment: `Approved by ${profile.name || 'Manager'}`,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        loadData();
+      } else {
+        alert(data.error || 'Failed to approve leave');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Approval error');
+    }
   };
 
-  const handleReject = (id: string) => {
+  const handleReject = async (id: string) => {
+    if (!profile?.id) return;
     const comment = prompt('Reason for rejection (optional):') || 'Rejected by manager';
-    LeaveService.reviewLeaveRequest(id, currentUser.id, 'rejected', comment);
-    loadData();
+    try {
+      const res = await fetch('/api/admin/leave', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          requestId: id,
+          action: 'rejected',
+          reviewerId: profile.id,
+          reviewerComment: comment,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        loadData();
+      } else {
+        alert(data.error || 'Failed to reject leave');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Rejection error');
+    }
   };
+
+  const pendingRequests = requests.filter((r) => r.status === 'pending');
+  const approvedRequests = requests.filter((r) => r.status === 'approved');
+  const rejectedRequests = requests.filter((r) => r.status === 'rejected');
 
   return (
     <DashboardShell>
       {/* Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 rounded-3xl text-white">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 rounded-3xl text-white shadow-sm">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight">Team Leave Approvals</h1>
-          <p className="text-xs text-slate-400 mt-1">Review, approve, or reject team leave requests and manage availability</p>
+          <p className="text-xs text-slate-400 mt-1">Review, approve, or reject employee leave applications with automatic quota balance deductions</p>
         </div>
       </div>
 
+      {errorMsg && (
+        <div className="p-4 bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-2xl flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-l-4 border-l-amber-500">
+        <Card className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pending Approvals</p>
-              <h3 className="text-2xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">{pendingRequests.length}</h3>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Approvals</p>
+              <h3 className="text-2xl sm:text-3xl font-black font-mono text-amber-600 dark:text-amber-400 mt-1">{pendingRequests.length}</h3>
             </div>
             <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-500">
               <Clock className="w-6 h-6" />
@@ -64,12 +125,12 @@ export default function ManagerLeavePage() {
           </div>
         </Card>
 
-        <Card className="border-l-4 border-l-emerald-500">
+        <Card className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Approved Requests</p>
-              <h3 className="text-2xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">
-                {allRequests.filter((r) => r.status === 'approved').length}
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Approved Requests</p>
+              <h3 className="text-2xl sm:text-3xl font-black font-mono text-emerald-600 dark:text-emerald-400 mt-1">
+                {approvedRequests.length}
               </h3>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
@@ -78,12 +139,12 @@ export default function ManagerLeavePage() {
           </div>
         </Card>
 
-        <Card className="border-l-4 border-l-rose-500">
+        <Card className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Rejected Requests</p>
-              <h3 className="text-2xl font-black font-mono text-slate-900 dark:text-slate-100 mt-1">
-                {allRequests.filter((r) => r.status === 'rejected').length}
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Rejected Requests</p>
+              <h3 className="text-2xl sm:text-3xl font-black font-mono text-rose-600 dark:text-rose-400 mt-1">
+                {rejectedRequests.length}
               </h3>
             </div>
             <div className="p-3 bg-rose-500/10 rounded-2xl text-rose-500">
@@ -99,12 +160,19 @@ export default function ManagerLeavePage() {
           <Clock className="w-4 h-4" /> Pending Team Leave Requests ({pendingRequests.length})
         </h3>
 
-        <LeaveTable
-          requests={pendingRequests}
-          isManagerView={true}
-          onApprove={handleApprove}
-          onReject={handleReject}
-        />
+        {isLoading ? (
+          <div className="p-12 flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl">
+            <Loader2 className="w-6 h-6 animate-spin text-blue-600 mr-2" />
+            <span className="text-xs font-semibold text-slate-500">Loading pending requests...</span>
+          </div>
+        ) : (
+          <LeaveTable
+            requests={pendingRequests}
+            isManagerView={true}
+            onApprove={handleApprove}
+            onReject={handleReject}
+          />
+        )}
       </div>
 
       {/* Processed Requests Section */}
@@ -114,7 +182,7 @@ export default function ManagerLeavePage() {
         </h3>
 
         <LeaveTable
-          requests={allRequests.filter((r) => r.status !== 'pending')}
+          requests={requests.filter((r) => r.status !== 'pending')}
           isManagerView={true}
         />
       </div>

@@ -36,7 +36,7 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
 
   const days = calculateWorkingDays(startDate, endDate);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
@@ -58,16 +58,24 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
     setLoading(true);
 
     try {
-      LeaveService.submitLeaveRequest({
-        user_id: userId,
-        user_name: userName,
-        department_name: departmentName,
-        leave_type: leaveType,
-        start_date: startDate,
-        end_date: endDate,
-        total_days: days || 1,
-        reason: reason.trim(),
+      const res = await fetch('/api/leave', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          leaveType,
+          startDate,
+          endDate,
+          totalDays: days || 1,
+          reason: reason.trim(),
+        }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Failed to submit leave request');
+      }
 
       setLoading(false);
       onRequestSubmitted();
