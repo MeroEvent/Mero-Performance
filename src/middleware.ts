@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
+          cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value)
           );
           supabaseResponse = NextResponse.next({ request });
@@ -33,7 +33,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Public routes — no auth required
-  const publicRoutes = ['/login', '/forgot-password', '/register'];
+  const publicRoutes = ['/login', '/forgot-password', '/register', '/leave-action'];
   const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route));
 
   // 1. Not logged in + trying to access protected route → redirect to /login

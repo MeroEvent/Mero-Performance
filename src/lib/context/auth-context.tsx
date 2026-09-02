@@ -24,7 +24,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
   const supabase = createClient();
 
-  const fetchProfile = async (userId: string, userEmail?: string) => {
+  const fetchProfile = async (userId: string, _email?: string) => {
     try {
       // First check localStorage cache for offline support (only in browser)
       let cachedProfile: string | null = null;
