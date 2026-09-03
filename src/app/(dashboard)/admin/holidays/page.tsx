@@ -163,7 +163,7 @@ export default function AdminHolidaysPage() {
               onClick={() => setViewMode('stats')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'stats'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -173,7 +173,7 @@ export default function AdminHolidaysPage() {
               onClick={() => setViewMode('calendar')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'calendar'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -183,7 +183,7 @@ export default function AdminHolidaysPage() {
               onClick={() => setViewMode('table')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 viewMode === 'table'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -193,7 +193,7 @@ export default function AdminHolidaysPage() {
 
           <button
             onClick={handleExportCSV}
-            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-blue-600 shadow-sm transition-colors cursor-pointer"
+            className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shadow-xs transition-colors cursor-pointer"
             title="Export CSV"
           >
             <Download className="w-4 h-4" />
@@ -201,7 +201,7 @@ export default function AdminHolidaysPage() {
 
           <button
             onClick={handleAddNew}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 active:scale-95 transition-all cursor-pointer"
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Mark Holiday
           </button>
@@ -415,13 +415,7 @@ export default function AdminHolidaysPage() {
                       {/* Name */}
                       <td className="py-4 px-5">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`p-2 rounded-xl border shrink-0 ${
-                              h.is_paid
-                                ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20'
-                                : 'bg-amber-500/10 text-amber-600 border-amber-500/20'
-                            }`}
-                          >
+                          <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
                             <CalendarIcon className="w-4 h-4" />
                           </div>
                           <div>
@@ -440,10 +434,10 @@ export default function AdminHolidaysPage() {
                       {/* Paid vs Unpaid Badge */}
                       <td className="py-4 px-4">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border ${
+                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
                             h.is_paid
-                              ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30'
-                              : 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30'
+                              ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                           }`}
                         >
                           {h.is_paid ? <DollarSign className="w-3 h-3" /> : <Ban className="w-3 h-3" />}
@@ -454,7 +448,7 @@ export default function AdminHolidaysPage() {
                       {/* Recurring */}
                       <td className="py-4 px-4">
                         {h.is_recurring ? (
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-400">
                             <Repeat className="w-3.5 h-3.5" /> Annual
                           </span>
                         ) : (
@@ -472,7 +466,7 @@ export default function AdminHolidaysPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button
                             onClick={() => handleEdit(h)}
-                            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors cursor-pointer"
+                            className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                             title="Edit Holiday"
                           >
                             <Edit3 className="w-4 h-4" />
