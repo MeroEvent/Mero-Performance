@@ -296,11 +296,11 @@ export const CompanyRulesForm: React.FC<CompanyRulesFormProps> = () => {
               onClick={() => handleTabChange(tab.id)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 cursor-pointer ${
                 isSelected
-                  ? 'bg-blue-600 text-white shadow-md shadow-blue-500/25 scale-102'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                   : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:border-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-400'}`} />
+              <Icon className={`w-3.5 h-3.5 ${isSelected ? 'text-white dark:text-slate-900' : 'text-slate-400'}`} />
               <span>{tab.label}</span>
               {tab.active && !isSelected && (
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
@@ -312,12 +312,12 @@ export const CompanyRulesForm: React.FC<CompanyRulesFormProps> = () => {
 
       {/* Unsaved Changes Banner */}
       {isDirty && (
-        <div className="p-4 rounded-3xl bg-blue-600 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
+        <div className="p-4 rounded-3xl bg-slate-900 dark:bg-slate-800 text-white border border-slate-800 dark:border-slate-700 shadow-md flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in">
           <div className="flex items-center gap-3">
-            <Sparkles className="w-5 h-5 text-blue-200 shrink-0" />
+            <Sparkles className="w-5 h-5 text-slate-400 shrink-0" />
             <div>
-              <p className="text-xs font-extrabold">You have unsaved policy changes</p>
-              <p className="text-[11px] text-blue-100">
+              <p className="text-xs font-bold">You have unsaved policy changes</p>
+              <p className="text-[11px] text-slate-400">
                 Save your modifications to update live company security rules in database.
               </p>
             </div>
@@ -339,7 +339,7 @@ export const CompanyRulesForm: React.FC<CompanyRulesFormProps> = () => {
               size="sm"
               isLoading={isSaving}
               onClick={() => handleSave()}
-              className="bg-white text-blue-900 hover:bg-blue-50 font-bold text-xs shadow-sm"
+              className="bg-white text-slate-900 hover:bg-slate-100 font-bold text-xs shadow-xs"
             >
               <Save className="w-3.5 h-3.5 mr-1.5" /> Save Changes
             </Button>
@@ -429,7 +429,7 @@ export const CompanyRulesForm: React.FC<CompanyRulesFormProps> = () => {
               size="sm"
               isLoading={isSaving}
               disabled={!isDirty}
-              className="font-bold text-xs shadow-md shadow-blue-500/20"
+              className="font-bold text-xs shadow-xs cursor-pointer"
             >
               <Save className="w-3.5 h-3.5 mr-1.5" /> Save Rules to Database
             </Button>

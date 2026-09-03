@@ -62,11 +62,11 @@ export const ShiftSelectorStep: React.FC<ShiftSelectorStepProps> = ({
                 onClick={() => onSelectShift(shift.id)}
                 className={`px-5 py-3 rounded-full text-xs font-bold flex items-center gap-2.5 transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30 scale-105'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                     : 'bg-white dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border border-slate-200/90 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 shadow-xs hover:scale-[1.02]'
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isSelected ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
+                <Icon className={`w-4 h-4 ${isSelected ? 'text-white dark:text-slate-900' : 'text-slate-500 dark:text-slate-400'}`} />
                 <span>{shift.display_name || shift.name}</span>
               </button>
             );

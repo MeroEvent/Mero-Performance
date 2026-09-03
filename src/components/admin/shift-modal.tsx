@@ -477,7 +477,7 @@ export const ShiftModal: React.FC<ShiftModalProps> = ({
           <Button type="button" variant="ghost" size="sm" onClick={onClose} disabled={isLoading} className="text-xs">
             Cancel
           </Button>
-          <Button type="submit" variant="primary" size="sm" isLoading={isLoading} className="font-bold text-xs shadow-md shadow-blue-500/20 px-5">
+          <Button type="submit" variant="primary" size="sm" isLoading={isLoading} className="font-bold text-xs shadow-xs px-5 cursor-pointer">
             {shift ? 'Save Shift' : 'Create Shift'}
           </Button>
         </div>

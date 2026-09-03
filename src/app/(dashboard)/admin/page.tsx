@@ -74,7 +74,7 @@ export default function AdminDashboardPage() {
     return (
       <DashboardShell>
         <div className="flex items-center justify-center p-24">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
       </DashboardShell>
     );

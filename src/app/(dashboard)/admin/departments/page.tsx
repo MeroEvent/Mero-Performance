@@ -112,7 +112,7 @@ export default function AdminDepartmentsPage() {
 
         <button
           onClick={handleAdd}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 active:scale-95 transition-all w-fit cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-bold shadow-xs active:scale-95 transition-all w-fit cursor-pointer"
         >
           <Plus className="w-4 h-4" /> Add New Department
         </button>
@@ -173,7 +173,7 @@ export default function AdminDepartmentsPage() {
                     {/* Department Name */}
                     <td className="py-4 px-5">
                       <div className="flex items-center gap-3">
-                        <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
+                        <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shrink-0">
                           <Building2 className="w-4 h-4" />
                         </div>
                         <div>
@@ -196,7 +196,7 @@ export default function AdminDepartmentsPage() {
                     {/* Employee Count */}
                     <td className="py-4 px-5">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold text-xs border border-slate-200 dark:border-slate-700">
-                        <Users className="w-3.5 h-3.5 text-blue-500" />
+                        <Users className="w-3.5 h-3.5 text-slate-400" />
                         <span>{dept.employee_count || 0} {dept.employee_count === 1 ? 'employee' : 'employees'}</span>
                       </span>
                     </td>
@@ -206,7 +206,7 @@ export default function AdminDepartmentsPage() {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => handleEdit(dept)}
-                          className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors cursor-pointer"
+                          className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
                           title="Edit Department"
                         >
                           <Edit3 className="w-4 h-4" />
