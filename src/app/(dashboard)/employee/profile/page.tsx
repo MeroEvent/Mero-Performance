@@ -134,9 +134,9 @@ export default function EmployeeProfilePage() {
                 `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(profile?.name || 'User')}`
               }
               alt={profile?.name || 'Avatar'}
-              className="w-28 h-28 rounded-full object-cover ring-4 ring-blue-500/20 shadow-md"
+              className="w-28 h-28 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700 shadow-sm"
             />
-            <label className="absolute bottom-0 right-0 p-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg cursor-pointer transition-transform group-hover:scale-105">
+            <label className="absolute bottom-0 right-0 p-2.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 rounded-full shadow-md cursor-pointer transition-transform group-hover:scale-105">
               <Camera className="w-4 h-4" />
               <input
                 type="file"
@@ -150,7 +150,7 @@ export default function EmployeeProfilePage() {
           <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{profile?.name}</h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{profile?.position || 'Team Member'}</p>
 
-          <div className="mt-3 px-3 py-1 bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full uppercase tracking-wider">
+          <div className="mt-3 px-3 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-xs font-bold rounded-full uppercase tracking-wider">
             {profile?.role || 'staff'}
           </div>
 

@@ -360,7 +360,7 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
   };
 
   return (
-    <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-lg dark:shadow-2xl relative overflow-hidden transition-all duration-300">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden transition-all duration-300">
       {feedbackMessage && (
         <div
           className={`mb-4 p-3.5 rounded-2xl text-xs font-semibold flex items-center gap-2 ${
@@ -380,16 +380,16 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
 
       {/* Holiday / Weekend / Leave Banner Notification (If not checked in) */}
       {!isCheckedIn && !isCompletedToday && todayHoliday && (
-        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-purple-500/15 via-indigo-500/10 to-pink-500/15 border border-purple-500/30 flex items-center gap-3.5 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-purple-500/20">
+        <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
                 Official Public Holiday
               </span>
-              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-600 text-white">
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
                 {todayHoliday.is_paid !== false ? 'Paid Holiday' : 'Holiday'}
               </span>
             </div>
@@ -404,12 +404,12 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
       )}
 
       {!isCheckedIn && !isCompletedToday && !todayHoliday && isWeekend && (
-        <div className="mb-6 p-4 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 flex items-center gap-3.5 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-slate-700 text-white flex items-center justify-center shrink-0">
+        <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
             <Coffee className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               Saturday • Weekly Off
             </span>
             <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
@@ -420,12 +420,12 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
       )}
 
       {!isCheckedIn && !isCompletedToday && !todayHoliday && !isWeekend && approvedLeave && (
-        <div className="mb-6 p-4 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center gap-3.5 shadow-sm">
-          <div className="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-teal-500/20">
+        <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
             <Umbrella className="w-5 h-5" />
           </div>
           <div>
-            <span className="text-xs font-extrabold uppercase tracking-wider text-teal-600 dark:text-teal-400">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
               Approved Leave ({approvedLeave.leave_type.toUpperCase()})
             </span>
             <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
@@ -457,7 +457,7 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
                 onClick={handleResetToday}
                 disabled={isLoading}
                 title="Dev Mode: Reset today's attendance to test again"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
               >
                 <RotateCcw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
                 <span>Reset Today (Dev)</span>
@@ -522,74 +522,66 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
             <button
               onClick={triggerCheckOutConfirmation}
               disabled={isLoading}
-              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-rose-600 via-red-600 to-orange-500 p-1 shadow-xl hover:shadow-rose-500/40 active:scale-95 transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-900"
+              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-rose-600 hover:bg-rose-700 active:scale-95 shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-800"
             >
-              <div className="w-full h-full rounded-full bg-slate-900/10 dark:bg-slate-900/20 group-hover:bg-transparent flex flex-col items-center justify-center transition-colors">
-                <LogOut className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-2 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-lg sm:text-xl font-extrabold text-white tracking-wide">CHECK OUT</span>
+              <div className="flex flex-col items-center justify-center">
+                <LogOut className="w-10 h-10 sm:w-11 sm:h-11 text-white mb-2 group-hover:scale-105 transition-transform duration-200" />
+                <span className="text-base sm:text-lg font-black text-white tracking-wider">CHECK OUT</span>
               </div>
             </button>
           ) : isCompletedToday ? (
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 p-1 shadow-xl flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-900">
-              <div className="w-full h-full rounded-full bg-slate-900/10 flex flex-col items-center justify-center p-4">
-                <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-1.5" />
-                <span className="text-sm font-extrabold text-white uppercase tracking-wider">Completed</span>
-                <span className="text-[11px] text-emerald-100 font-medium mt-0.5">
-                  {Number(todayRecord?.total_hours || 0).toFixed(2)} hrs logged
-                </span>
-              </div>
+            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <CheckCircle2 className="w-10 h-10 sm:w-11 sm:h-11 text-emerald-400 mb-1.5" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">Completed</span>
+              <span className="text-[11px] text-slate-300 font-medium mt-0.5 font-mono">
+                {Number(todayRecord?.total_hours || 0).toFixed(2)} hrs logged
+              </span>
             </div>
           ) : todayHoliday ? (
             /* Holiday Lock Badge */
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 p-1 shadow-xl flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-900">
-              <div className="w-full h-full rounded-full bg-slate-900/20 flex flex-col items-center justify-center p-4">
-                <Palmtree className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-1.5" />
-                <span className="text-sm font-extrabold text-white uppercase tracking-wider">Holiday</span>
-                <span className="text-[11px] text-purple-100 font-medium mt-0.5 line-clamp-1 max-w-[120px]">
-                  {todayHoliday.name}
-                </span>
-                <span className="text-[9px] text-purple-200/80 font-bold uppercase mt-1">
-                  Office Closed
-                </span>
-              </div>
+            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Palmtree className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">Holiday</span>
+              <span className="text-[11px] text-slate-300 font-medium mt-0.5 line-clamp-1 max-w-[120px]">
+                {todayHoliday.name}
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase mt-1">
+                Office Closed
+              </span>
             </div>
           ) : isWeekend ? (
             /* Weekend / Saturday Lock Badge */
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-slate-600 to-slate-800 p-1 shadow-xl flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-900">
-              <div className="w-full h-full rounded-full bg-slate-900/20 flex flex-col items-center justify-center p-4">
-                <Coffee className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-1.5" />
-                <span className="text-sm font-extrabold text-white uppercase tracking-wider">Weekly Off</span>
-                <span className="text-[11px] text-slate-300 font-medium mt-0.5">
-                  Saturday
-                </span>
-                <span className="text-[9px] text-slate-400 font-bold uppercase mt-1">
-                  Office Closed
-                </span>
-              </div>
+            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Coffee className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">Weekly Off</span>
+              <span className="text-[11px] text-slate-300 font-medium mt-0.5">
+                Saturday
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase mt-1">
+                Office Closed
+              </span>
             </div>
           ) : approvedLeave ? (
             /* Approved Leave Lock Badge */
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-teal-600 to-cyan-600 p-1 shadow-xl flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-900">
-              <div className="w-full h-full rounded-full bg-slate-900/20 flex flex-col items-center justify-center p-4">
-                <Umbrella className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-1.5" />
-                <span className="text-sm font-extrabold text-white uppercase tracking-wider">On Leave</span>
-                <span className="text-[11px] text-teal-100 font-medium mt-0.5">
-                  {approvedLeave.leave_type.toUpperCase()}
-                </span>
-                <span className="text-[9px] text-teal-200/80 font-bold uppercase mt-1">
-                  Excused
-                </span>
-              </div>
+            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Umbrella className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">On Leave</span>
+              <span className="text-[11px] text-slate-300 font-medium mt-0.5">
+                {approvedLeave.leave_type.toUpperCase()}
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase mt-1">
+                Excused
+              </span>
             </div>
           ) : (
             <button
               onClick={triggerCheckInConfirmation}
               disabled={isLoading}
-              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-500 p-1 shadow-xl hover:shadow-blue-500/40 active:scale-95 transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-900"
+              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 active:scale-95 shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-800"
             >
-              <div className="w-full h-full rounded-full bg-slate-900/10 dark:bg-slate-900/20 group-hover:bg-transparent flex flex-col items-center justify-center transition-colors">
-                <LogIn className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-2 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-lg sm:text-xl font-extrabold text-white tracking-wide">CHECK IN</span>
+              <div className="flex flex-col items-center justify-center">
+                <LogIn className="w-10 h-10 sm:w-11 sm:h-11 text-white dark:text-slate-900 mb-2 group-hover:scale-105 transition-transform duration-200" />
+                <span className="text-base sm:text-lg font-black tracking-wider">CHECK IN</span>
               </div>
             </button>
           )}

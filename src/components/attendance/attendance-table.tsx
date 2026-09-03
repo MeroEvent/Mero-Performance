@@ -129,7 +129,7 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+            <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
               <Layers className="w-4 h-4" />
             </div>
             <div>
@@ -163,101 +163,41 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
 
         {/* Status Pill Tabs with Count Badges */}
         <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
-          <button
-            onClick={() => { setStatusFilter('all'); setCurrentPage(1); }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'all'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
-            }`}
-          >
-            <span>All</span>
-            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-              statusFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-            }`}>
-              {statusCounts.all}
-            </span>
-          </button>
-
-          <button
-            onClick={() => { setStatusFilter('present'); setCurrentPage(1); }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'present'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
-            }`}
-          >
-            <span>Present</span>
-            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-              statusFilter === 'present' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-            }`}>
-              {statusCounts.present}
-            </span>
-          </button>
-
-          <button
-            onClick={() => { setStatusFilter('late'); setCurrentPage(1); }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'late'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
-            }`}
-          >
-            <span>Late</span>
-            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-              statusFilter === 'late' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-            }`}>
-              {statusCounts.late}
-            </span>
-          </button>
-
-          <button
-            onClick={() => { setStatusFilter('absent'); setCurrentPage(1); }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'absent'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
-            }`}
-          >
-            <span>Absent</span>
-            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-              statusFilter === 'absent' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-            }`}>
-              {statusCounts.absent}
-            </span>
-          </button>
-
-          <button
-            onClick={() => { setStatusFilter('on_leave'); setCurrentPage(1); }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'on_leave'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
-            }`}
-          >
-            <span>Leave</span>
-            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-              statusFilter === 'on_leave' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-            }`}>
-              {statusCounts.on_leave}
-            </span>
-          </button>
-
-          <button
-            onClick={() => { setStatusFilter('holiday'); setCurrentPage(1); }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              statusFilter === 'holiday'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 border border-transparent'
-            }`}
-          >
-            <span>Holiday</span>
-            <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
-              statusFilter === 'holiday' ? 'bg-white/20 text-white' : 'bg-slate-200/80 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
-            }`}>
-              {statusCounts.holiday}
-            </span>
-          </button>
+          {[
+            { key: 'all', label: 'All', count: statusCounts.all },
+            { key: 'present', label: 'Present', count: statusCounts.present },
+            { key: 'late', label: 'Late', count: statusCounts.late },
+            { key: 'absent', label: 'Absent', count: statusCounts.absent },
+            { key: 'on_leave', label: 'Leave', count: statusCounts.on_leave },
+            { key: 'holiday', label: 'Holiday', count: statusCounts.holiday },
+          ].map((tab) => {
+            const isActive = statusFilter === tab.key;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => {
+                  setStatusFilter(tab.key);
+                  setCurrentPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer flex items-center gap-1.5 border ${
+                  isActive
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white font-bold shadow-xs'
+                    : 'bg-slate-50 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 border-slate-200/80 dark:border-slate-700/80 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span
+                  className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono ${
+                    isActive
+                      ? 'bg-white/20 dark:bg-slate-900/20 text-white dark:text-slate-900 font-semibold'
+                      : 'bg-slate-200/80 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -314,40 +254,40 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                     )}
 
                     {/* Date */}
-                    <td className="py-3.5 px-4 font-semibold font-mono text-slate-900 dark:text-white">
+                    <td className="py-3.5 px-4 font-mono text-slate-800 dark:text-slate-200">
                       <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                        <span>{formatDateDisplay(r.date)}</span>
+                        <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="font-semibold text-xs">{formatDateDisplay(r.date)}</span>
                       </div>
                     </td>
 
                     {/* Work Shift */}
                     <td className="py-3.5 px-4">
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 rounded-lg border border-slate-200/60 dark:border-slate-700/60">
-                        <Clock className="w-3 h-3 text-blue-500 shrink-0" />
+                      <div className="inline-flex items-center gap-1.5 text-slate-600 dark:text-slate-400 text-xs">
+                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                         <span>{r.shift_name || 'Standard'}</span>
-                      </span>
+                      </div>
                     </td>
 
                     {/* Punch-In Time */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
-                      {r.check_in_time ? formatTime(r.check_in_time) : <span className="text-slate-400">--:--</span>}
+                    <td className="py-3.5 px-4 font-mono font-semibold text-slate-800 dark:text-slate-200">
+                      {r.check_in_time ? formatTime(r.check_in_time) : <span className="text-slate-400 font-normal">--:--</span>}
                     </td>
 
                     {/* Punch-Out Time */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-slate-900 dark:text-white">
+                    <td className="py-3.5 px-4 font-mono text-slate-800 dark:text-slate-200">
                       {r.check_out_time ? (
-                        formatTime(r.check_out_time)
+                        <span className="font-semibold">{formatTime(r.check_out_time)}</span>
                       ) : r.check_in_time ? (
-                        <span className="text-amber-500 font-bold">Active</span>
+                        <span className="text-slate-400 dark:text-slate-500 font-sans text-xs">Active</span>
                       ) : (
-                        <span className="text-slate-400">--:--</span>
+                        <span className="text-slate-400 font-normal">--:--</span>
                       )}
                     </td>
 
                     {/* Worked Hours */}
-                    <td className="py-3.5 px-4 font-mono font-bold text-blue-600 dark:text-blue-400">
-                      {r.total_hours > 0 ? `${Number(r.total_hours).toFixed(2)}h` : '--'}
+                    <td className="py-3.5 px-4 font-mono font-medium text-slate-700 dark:text-slate-300">
+                      {r.total_hours > 0 ? `${Number(r.total_hours).toFixed(2)}h` : <span className="text-slate-300 dark:text-slate-600 font-sans">--</span>}
                     </td>
 
                     {/* Status Badge */}
@@ -355,24 +295,17 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       <StatusBadge status={r.status} />
                     </td>
 
-                    {/* Verification Metadata (GPS / Network / Anti-Proxy) */}
+                    {/* Verification Metadata */}
                     <td className="py-3.5 px-4 text-slate-500 dark:text-slate-400 text-[11px]">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium text-[10px] border ${
-                            r.location_verified
-                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'
-                          }`}
-                          title="GPS verification"
-                        >
-                          <MapPin className="w-2.5 h-2.5" />
-                          <span>{r.location_verified ? 'GPS' : 'Standard'}</span>
-                        </span>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-1 text-slate-500 dark:text-slate-400 text-[11px]">
+                          <MapPin className="w-3 h-3 text-slate-400" />
+                          <span>{r.location_verified ? 'Office GPS' : 'Standard'}</span>
+                        </div>
 
                         {r.edited_by && (
                           <span
-                            className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                            className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700"
                             title={`Manually adjusted by admin: ${r.edit_reason || 'No reason provided'}`}
                           >
                             Edited
@@ -386,8 +319,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                       <td className="py-3.5 px-5 text-right">
                         <button
                           onClick={() => setEditingRecord(r)}
-                          className="p-2 rounded-xl text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors cursor-pointer"
-                          title="Adjust punch & log audit entry"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                          title="Adjust attendance record"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
                         </button>

@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import { AttendanceRecord, AttendanceStatus } from '@/types';
 import { AttendanceService } from '@/lib/services/attendance-store';
-import { AuditService } from '@/lib/services/audit-store';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 import { calculateHoursWorked } from '@/lib/utils/attendance';
 
 interface AttendanceEditModalProps {
@@ -37,14 +37,19 @@ export const AttendanceEditModal: React.FC<AttendanceEditModalProps> = ({
   const [reason, setReason] = useState<string>('');
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [showConfirm, setShowConfirm] = useState<boolean>(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleOpenConfirm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reason.trim()) {
       setError('A mandatory reason is required for attendance adjustments.');
       return;
     }
+    setError('');
+    setShowConfirm(true);
+  };
 
+  const handleExecuteSave = async () => {
     try {
       setIsSubmitting(true);
       setError('');
@@ -96,9 +101,11 @@ export const AttendanceEditModal: React.FC<AttendanceEditModalProps> = ({
         }
       } catch {}
 
+      setShowConfirm(false);
       onRecordUpdated();
       onClose();
     } catch (err: any) {
+      setShowConfirm(false);
       setError(err.message || 'Failed to update attendance record');
     } finally {
       setIsSubmitting(false);
@@ -106,88 +113,107 @@ export const AttendanceEditModal: React.FC<AttendanceEditModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Edit Attendance — ${record.user_name || 'Staff'}`}>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {error && (
-          <div className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl">
-            {error}
+    <>
+      <Modal isOpen={isOpen && !showConfirm} onClose={onClose} title={`Edit Attendance — ${record.user_name || 'Staff'}`}>
+        <form onSubmit={handleOpenConfirm} className="space-y-4">
+          {error && (
+            <div className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-semibold rounded-xl">
+              {error}
+            </div>
+          )}
+
+          <div className="p-3 bg-slate-100 dark:bg-slate-850 rounded-xl text-xs space-y-1">
+            <p className="font-semibold text-slate-700 dark:text-slate-300">
+              Date: <span className="font-mono">{record.date}</span>
+            </p>
+            <p className="text-slate-500">
+              Original Status: <span className="uppercase font-bold">{record.status}</span>
+            </p>
           </div>
-        )}
 
-        <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs space-y-1">
-          <p className="font-semibold text-slate-700 dark:text-slate-300">Date: <span className="font-mono">{record.date}</span></p>
-          <p className="text-slate-500">Original Status: <span className="uppercase font-bold">{record.status}</span></p>
-        </div>
-
-        {/* Status Override */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Status Override
-          </label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value as AttendanceStatus)}
-            className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100"
-          >
-            <option value="on_time">On Time</option>
-            <option value="late">Late</option>
-            <option value="very_late">Very Late</option>
-            <option value="half_day">Half Day</option>
-            <option value="absent">Absent</option>
-            <option value="on_leave">On Leave</option>
-          </select>
-        </div>
-
-        {/* Check In / Out Time Adjustments */}
-        <div className="grid grid-cols-2 gap-3">
+          {/* Status Override */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Check-In Time
+              Status Override
             </label>
-            <input
-              type="time"
-              value={checkInTime}
-              onChange={(e) => setCheckInTime(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100"
-            />
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as AttendanceStatus)}
+              className="w-full px-3.5 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-slate-400 text-slate-900 dark:text-slate-100"
+            >
+              <option value="on_time">On Time</option>
+              <option value="late">Late</option>
+              <option value="very_late">Very Late</option>
+              <option value="half_day">Half Day</option>
+              <option value="absent">Absent</option>
+              <option value="on_leave">On Leave</option>
+            </select>
           </div>
+
+          {/* Check In / Out Time Adjustments */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Check-In Time
+              </label>
+              <input
+                type="time"
+                value={checkInTime}
+                onChange={(e) => setCheckInTime(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-slate-400 text-slate-900 dark:text-slate-100"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                Check-Out Time
+              </label>
+              <input
+                type="time"
+                value={checkOutTime}
+                onChange={(e) => setCheckOutTime(e.target.value)}
+                className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-slate-400 text-slate-900 dark:text-slate-100"
+              />
+            </div>
+          </div>
+
+          {/* Mandatory Reason */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Check-Out Time
+              Reason for Change (Audit Requirement)
             </label>
-            <input
-              type="time"
-              value={checkOutTime}
-              onChange={(e) => setCheckOutTime(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100"
+            <textarea
+              rows={3}
+              required
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="e.g. Employee forgot to check in due to offsite meeting..."
+              className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-slate-400 text-slate-900 dark:text-slate-100"
             />
           </div>
-        </div>
 
-        {/* Mandatory Reason */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-            Reason for Change (Audit Requirement)
-          </label>
-          <textarea
-            rows={3}
-            required
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="e.g. Employee forgot to check in due to client meeting..."
-            className="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100"
-          />
-        </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" size="sm" disabled={isSubmitting}>
+              Save Adjustment
+            </Button>
+          </div>
+        </form>
+      </Modal>
 
-        <div className="flex justify-end gap-2 pt-2">
-          <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="primary" size="sm" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving Adjustment...' : 'Save Adjustment'}
-          </Button>
-        </div>
-      </form>
-    </Modal>
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showConfirm}
+        onClose={() => setShowConfirm(false)}
+        onConfirm={handleExecuteSave}
+        title="Confirm Attendance Adjustment"
+        description={`Are you sure you want to adjust the attendance record for ${record.user_name || 'this employee'} on ${record.date}? An immutable audit log entry will be permanently recorded.`}
+        confirmText="Confirm & Save"
+        cancelText="Back to Edit"
+        variant="primary"
+        isLoading={isSubmitting}
+      />
+    </>
   );
 };

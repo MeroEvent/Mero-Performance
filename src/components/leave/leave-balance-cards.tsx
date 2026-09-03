@@ -14,18 +14,18 @@ export const LeaveBalanceCards: React.FC<LeaveBalanceCardsProps> = ({ balances, 
   const getIcon = (type: string) => {
     switch (type) {
       case 'sick':
-        return <HeartPulse className="w-5 h-5 text-rose-500" />;
+        return <HeartPulse className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
       case 'casual':
-        return <Calendar className="w-5 h-5 text-amber-500" />;
+        return <Calendar className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
       case 'vacation':
-        return <Palmtree className="w-5 h-5 text-blue-500" />;
+        return <Palmtree className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
       case 'unpaid':
         return <AlertCircle className="w-5 h-5 text-slate-400" />;
       case 'wfh':
-        return <Home className="w-5 h-5 text-indigo-500" />;
+        return <Home className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
       case 'comp_off':
       default:
-        return <Clock className="w-5 h-5 text-teal-500" />;
+        return <Clock className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
     }
   };
 
@@ -43,7 +43,7 @@ export const LeaveBalanceCards: React.FC<LeaveBalanceCardsProps> = ({ balances, 
         return (
           <Card key={config.type} className="p-4 flex flex-col justify-between hover:border-slate-300 dark:hover:border-slate-700 transition-all">
             <div className="flex items-center justify-between">
-              <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800/80">
+              <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
                 {getIcon(config.type)}
               </div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
@@ -67,9 +67,7 @@ export const LeaveBalanceCards: React.FC<LeaveBalanceCardsProps> = ({ balances, 
               {config.type !== 'unpaid' && (
                 <div className="w-full bg-slate-100 dark:bg-slate-800 h-1.5 rounded-full overflow-hidden mt-2">
                   <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      pct > 80 ? 'bg-rose-500' : pct > 50 ? 'bg-amber-500' : 'bg-blue-500'
-                    }`}
+                    className="h-full rounded-full bg-slate-900 dark:bg-white transition-all duration-300"
                     style={{ width: `${pct}%` }}
                   />
                 </div>

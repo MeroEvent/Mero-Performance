@@ -23,7 +23,7 @@ export default function EmployeeHistoryPage() {
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [activeTab, setActiveTab] = useState<'calendar' | 'table'>('calendar');
   const [dateMode, setDateMode] = useState<'month' | 'custom'>('month');
-  const [activePreset, setActivePreset] = useState<'this_month' | 'last_month' | 'last_7_days' | 'last_30_days' | 'custom'>('this_month');
+  const [activePreset, setActivePreset] = useState<'today' | 'this_month' | 'last_month' | 'last_7_days' | 'custom'>('this_month');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   
   const todayStr = new Date().toISOString().split('T')[0];
@@ -58,10 +58,15 @@ export default function EmployeeHistoryPage() {
     setActivePreset('custom');
   };
 
-  const handleSetPreset = (preset: 'this_month' | 'last_month' | 'last_7_days' | 'last_30_days') => {
+  const handleSetPreset = (preset: 'today' | 'this_month' | 'last_month' | 'last_7_days') => {
     const now = new Date();
     setActivePreset(preset);
-    if (preset === 'this_month') {
+    if (preset === 'today') {
+      setDateMode('custom');
+      const todayStr = now.toISOString().split('T')[0];
+      setCustomStartDate(todayStr);
+      setCustomEndDate(todayStr);
+    } else if (preset === 'this_month') {
       setDateMode('month');
       setSelectedDate(now);
     } else if (preset === 'last_month') {
@@ -72,12 +77,6 @@ export default function EmployeeHistoryPage() {
       const past7 = new Date();
       past7.setDate(past7.getDate() - 6);
       setCustomStartDate(past7.toISOString().split('T')[0]);
-      setCustomEndDate(now.toISOString().split('T')[0]);
-    } else if (preset === 'last_30_days') {
-      setDateMode('custom');
-      const past30 = new Date();
-      past30.setDate(past30.getDate() - 29);
-      setCustomStartDate(past30.toISOString().split('T')[0]);
       setCustomEndDate(now.toISOString().split('T')[0]);
     }
   };
@@ -136,12 +135,12 @@ export default function EmployeeHistoryPage() {
 
         <div className="flex items-center gap-3">
           {/* Tab Toggle */}
-          <div className="flex items-center bg-slate-200 dark:bg-slate-800 p-1 rounded-xl">
+          <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
             <button
               onClick={() => setActiveTab('calendar')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'calendar'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm font-bold'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
@@ -149,9 +148,9 @@ export default function EmployeeHistoryPage() {
             </button>
             <button
               onClick={() => setActiveTab('table')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'table'
-                  ? 'bg-white dark:bg-slate-900 text-blue-600 dark:text-blue-400 shadow-sm font-bold'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
               }`}
             >
@@ -160,7 +159,7 @@ export default function EmployeeHistoryPage() {
           </div>
 
           <Button variant="outline" size="sm" onClick={handleExportAll} className="gap-1.5 font-bold text-xs cursor-pointer">
-            <Download className="w-3.5 h-3.5 text-blue-500" /> Download PDF Report
+            <Download className="w-3.5 h-3.5 text-slate-400" /> Download PDF Report
           </Button>
         </div>
       </div>
@@ -177,7 +176,7 @@ export default function EmployeeHistoryPage() {
           <div className="md:px-6 first:pl-0">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Days Present</p>
             <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white mt-1.5">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-blue-500" /> : totalPresent}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : totalPresent}
             </p>
           </div>
 
@@ -185,7 +184,7 @@ export default function EmployeeHistoryPage() {
           <div className="md:px-6">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Days Late</p>
             <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white mt-1.5">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-amber-500" /> : totalLate}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : totalLate}
             </p>
           </div>
 
@@ -193,7 +192,7 @@ export default function EmployeeHistoryPage() {
           <div className="md:px-6">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Days Absent</p>
             <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white mt-1.5">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-rose-500" /> : totalAbsent}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : totalAbsent}
             </p>
           </div>
 
@@ -201,7 +200,7 @@ export default function EmployeeHistoryPage() {
           <div className="md:px-6 last:pr-0">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Hours</p>
             <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white mt-1.5">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-blue-500" /> : `${totalHours.toFixed(1)}h`}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : `${totalHours.toFixed(1)}h`}
             </p>
           </div>
         </div>
@@ -224,11 +223,22 @@ export default function EmployeeHistoryPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={() => handleSetPreset('today')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                activePreset === 'today'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-bold'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+              }`}
+            >
+              Today
+            </button>
+            <button
+              type="button"
               onClick={() => handleSetPreset('this_month')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                 activePreset === 'this_month'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                  : 'bg-slate-50 dark:bg-[#060c1d]/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-bold'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
               }`}
             >
               This Month
@@ -238,8 +248,8 @@ export default function EmployeeHistoryPage() {
               onClick={() => handleSetPreset('last_month')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                 activePreset === 'last_month'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                  : 'bg-slate-50 dark:bg-[#060c1d]/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-bold'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
               }`}
             >
               Last Month
@@ -249,22 +259,11 @@ export default function EmployeeHistoryPage() {
               onClick={() => handleSetPreset('last_7_days')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                 activePreset === 'last_7_days'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                  : 'bg-slate-50 dark:bg-[#060c1d]/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-bold'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
               }`}
             >
               Last 7 Days
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSetPreset('last_30_days')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                activePreset === 'last_30_days'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                  : 'bg-slate-50 dark:bg-[#060c1d]/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
-              }`}
-            >
-              Last 30 Days
             </button>
           </div>
         </div>

@@ -81,21 +81,23 @@ export default function EmployeeLeavePage() {
 
   return (
     <DashboardShell>
-      {/* Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border border-slate-800 p-6 rounded-3xl text-white shadow-sm">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-1">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">My Leave Portal</h1>
-          <p className="text-xs text-slate-300 mt-1">Manage annual leave quotas, apply for leave, and view request statuses</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            My Leave Portal
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            Manage annual leave quotas, apply for leave, and view request statuses
+          </p>
         </div>
 
-        <Button
-          variant="primary"
-          size="md"
+        <button
           onClick={() => setIsModalOpen(true)}
-          className="gap-2 shadow-lg shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 text-white font-bold"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs sm:text-sm font-bold shadow-xs active:scale-95 transition-all w-fit cursor-pointer"
         >
           <Plus className="w-4 h-4" /> Apply for Leave
-        </Button>
+        </button>
       </div>
 
       {errorMsg && (
