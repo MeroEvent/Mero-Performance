@@ -62,12 +62,9 @@ function LeaveActionContent() {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 sm:p-6 text-slate-100">
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl text-center relative overflow-hidden">
-        {/* Background glow */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-
         {/* Company Header */}
         <div className="flex items-center justify-center gap-2 mb-6">
-          <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-blue-500/20">
+          <div className="w-8 h-8 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-white font-black text-sm shadow-xs">
             M
           </div>
           <span className="text-base font-extrabold tracking-tight text-white">Mero Attendance</span>
@@ -75,7 +72,7 @@ function LeaveActionContent() {
 
         {loading ? (
           <div className="py-12 flex flex-col items-center justify-center space-y-4">
-            <Loader2 className="w-12 h-12 text-blue-500 animate-spin" />
+            <Loader2 className="w-10 h-10 text-slate-400 animate-spin" />
             <div>
               <h2 className="text-lg font-bold text-white">Processing Leave Decision...</h2>
               <p className="text-xs text-slate-400 mt-1">Verifying cryptographic token & updating roster</p>
@@ -156,7 +153,7 @@ function LeaveActionContent() {
             <div className="pt-2 flex flex-col sm:flex-row gap-3">
               <Link
                 href="/admin/leave"
-                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm bg-white hover:bg-slate-100 text-slate-900 shadow-xs transition-all active:scale-[0.98]"
               >
                 <span>Admin Portal</span>
                 <ArrowRight className="w-4 h-4" />
@@ -187,7 +184,7 @@ function LeaveActionContent() {
             <div className="pt-2">
               <Link
                 href="/admin/leave"
-                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-600/30 transition-all"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm bg-white hover:bg-slate-100 text-slate-900 shadow-xs transition-all"
               >
                 <span>Open Admin Portal</span>
                 <ArrowRight className="w-4 h-4" />

@@ -112,7 +112,7 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <Button type="submit" variant="primary" className="w-full py-3 mt-2 font-semibold shadow-lg shadow-blue-500/20" isLoading={isLoading}>
+          <Button type="submit" variant="primary" className="w-full py-3 mt-2 font-bold shadow-xs cursor-pointer" isLoading={isLoading}>
             Sign In to Dashboard <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </form>
