@@ -48,7 +48,7 @@ export default function ManagerTeamPage() {
         {/* Team Members List */}
         <Card className="p-4">
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 px-2 flex items-center gap-2">
-            <Users className="w-4 h-4 text-blue-500" /> Direct Reports ({teamMembers.length})
+            <Users className="w-4 h-4 text-slate-400" /> Direct Reports ({teamMembers.length})
           </h3>
 
           <div className="space-y-2">
@@ -58,18 +58,18 @@ export default function ManagerTeamPage() {
                 onClick={() => setSelectedMember(member)}
                 className={`p-3 rounded-xl border cursor-pointer transition-all duration-150 flex items-center gap-3 ${
                   selectedMember?.id === member.id
-                    ? 'bg-blue-600/10 border-blue-500/40 text-blue-400 shadow-sm'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs'
                     : 'bg-slate-50 dark:bg-slate-800/40 border-slate-200/80 dark:border-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
                 <img
                   src={member.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80'}
                   alt={member.name}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/20"
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold truncate text-slate-900 dark:text-slate-100">{member.name}</p>
-                  <p className="text-[11px] text-slate-400 truncate">{member.position || 'Staff'}</p>
+                  <p className={`text-xs font-bold truncate ${selectedMember?.id === member.id ? 'text-white dark:text-slate-900' : 'text-slate-900 dark:text-slate-100'}`}>{member.name}</p>
+                  <p className={`text-[11px] truncate ${selectedMember?.id === member.id ? 'text-slate-300 dark:text-slate-600' : 'text-slate-400'}`}>{member.position || 'Staff'}</p>
                 </div>
               </div>
             ))}
@@ -85,7 +85,7 @@ export default function ManagerTeamPage() {
                   <img
                     src={selectedMember.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
                     alt={selectedMember.name}
-                    className="w-16 h-16 rounded-full object-cover ring-4 ring-blue-500/20"
+                    className="w-16 h-16 rounded-full object-cover ring-2 ring-slate-200 dark:ring-slate-700"
                   />
                   <div>
                     <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">{selectedMember.name}</h2>

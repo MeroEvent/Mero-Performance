@@ -29,70 +29,65 @@ export default function ManagerDashboardPage() {
 
   return (
     <DashboardShell>
-      {/* Top Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 border border-slate-800 p-6 rounded-3xl text-white">
+      {/* Clean Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-1">
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Team Overview Dashboard</h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            Team Overview Dashboard
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Real-time status monitoring for {currentUser.department_name || 'Engineering'} Team
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 px-4 py-2 rounded-2xl text-xs font-semibold text-blue-300">
-          <TrendingUp className="w-4 h-4 text-blue-400" />
-          Team Attendance Rate: <strong className="text-white font-mono text-sm">{stats.teamAttendanceRate}%</strong>
+        <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-700 dark:text-slate-300 shadow-xs self-start sm:self-auto">
+          <TrendingUp className="w-4 h-4 text-slate-400" />
+          <span>Team Attendance Rate:</span>
+          <strong className="text-slate-900 dark:text-white font-mono text-sm">{stats.teamAttendanceRate}%</strong>
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-blue-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Team Members</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1 font-mono">{stats.totalTeamMembers}</h3>
-            </div>
-            <div className="p-3 bg-blue-500/10 rounded-2xl text-blue-500">
-              <Users className="w-6 h-6" />
-            </div>
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Team Members</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 font-mono">{stats.totalTeamMembers}</h3>
           </div>
-        </Card>
+          <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-300">
+            <Users className="w-5 h-5" />
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-emerald-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Checked In Today</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1 font-mono">{stats.checkedInToday}</h3>
-            </div>
-            <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-500">
-              <Clock className="w-6 h-6" />
-            </div>
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Checked In Today</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 font-mono">{stats.checkedInToday}</h3>
           </div>
-        </Card>
+          <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-300">
+            <Clock className="w-5 h-5" />
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-amber-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Late Today</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1 font-mono">{stats.lateToday}</h3>
-            </div>
-            <div className="p-3 bg-amber-500/10 rounded-2xl text-amber-500">
-              <AlertTriangle className="w-6 h-6" />
-            </div>
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Late Today</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 font-mono">{stats.lateToday}</h3>
           </div>
-        </Card>
+          <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-300">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+        </div>
 
-        <Card className="border-l-4 border-l-rose-500">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Absent Today</p>
-              <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 mt-1 font-mono">{stats.absentToday}</h3>
-            </div>
-            <div className="p-3 bg-rose-500/10 rounded-2xl text-rose-500">
-              <UserCheck className="w-6 h-6" />
-            </div>
+        <div className="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+          <div>
+            <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Absent Today</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 font-mono">{stats.absentToday}</h3>
           </div>
-        </Card>
+          <div className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-slate-700 dark:text-slate-300">
+            <UserCheck className="w-5 h-5" />
+          </div>
+        </div>
       </div>
 
       {/* Team Attendance Table */}
