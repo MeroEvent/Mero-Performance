@@ -34,13 +34,14 @@ export async function GET(req: NextRequest) {
     const startDate = searchParams.get('startDate') || defaultStart;
     const endDate = searchParams.get('endDate') || defaultEnd;
 
-    // 1. Fetch Users in scope
+    // 1. Fetch Users in scope (Excluding administrators from general attendance tracking)
     let usersQuery = supabase
       .from('user_profiles')
       .select(`
         id,
         name,
         email,
+        role,
         department_id,
         position,
         join_date,
@@ -51,9 +52,6 @@ export async function GET(req: NextRequest) {
 
     if (userId && userId !== 'all') {
       usersQuery = usersQuery.eq('id', userId);
-    }
-    if (departmentId && departmentId !== 'all') {
-      usersQuery = usersQuery.eq('department_id', departmentId);
     }
 
     const { data: usersData, error: usersErr } = await usersQuery;
@@ -67,6 +65,7 @@ export async function GET(req: NextRequest) {
           id,
           name,
           email,
+          role,
           department_id,
           position,
           join_date,
@@ -90,6 +89,7 @@ export async function GET(req: NextRequest) {
           id,
           name,
           email,
+          role,
           department_id,
           position,
           department:departments (id, name)

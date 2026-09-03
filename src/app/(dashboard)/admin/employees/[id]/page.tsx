@@ -17,7 +17,8 @@ import {
   CheckCircle, 
   XCircle, 
   Loader2, 
-  Briefcase
+  Briefcase,
+  Shield
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -32,7 +33,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
   const [employee, setEmployee] = useState<any | null>(null);
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
   const [dateMode, setDateMode] = useState<'month' | 'custom'>('month');
-  const [activePreset, setActivePreset] = useState<'this_month' | 'last_month' | 'last_7_days' | 'last_30_days' | 'custom'>('this_month');
+  const [activePreset, setActivePreset] = useState<'today' | 'this_month' | 'last_month' | 'last_7_days' | 'custom'>('this_month');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const todayStr = new Date().toISOString().split('T')[0];
   const firstDayStr = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
@@ -66,10 +67,15 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
     setActivePreset('custom');
   };
 
-  const handleSetPreset = (preset: 'this_month' | 'last_month' | 'last_7_days' | 'last_30_days') => {
+  const handleSetPreset = (preset: 'today' | 'this_month' | 'last_month' | 'last_7_days') => {
     const now = new Date();
     setActivePreset(preset);
-    if (preset === 'this_month') {
+    if (preset === 'today') {
+      setDateMode('custom');
+      const todayStr = now.toISOString().split('T')[0];
+      setCustomStartDate(todayStr);
+      setCustomEndDate(todayStr);
+    } else if (preset === 'this_month') {
       setDateMode('month');
       setSelectedDate(now);
     } else if (preset === 'last_month') {
@@ -80,12 +86,6 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
       const past7 = new Date();
       past7.setDate(past7.getDate() - 6);
       setCustomStartDate(past7.toISOString().split('T')[0]);
-      setCustomEndDate(now.toISOString().split('T')[0]);
-    } else if (preset === 'last_30_days') {
-      setDateMode('custom');
-      const past30 = new Date();
-      past30.setDate(past30.getDate() - 29);
-      setCustomStartDate(past30.toISOString().split('T')[0]);
       setCustomEndDate(now.toISOString().split('T')[0]);
     }
   };
@@ -153,7 +153,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
     return (
       <DashboardShell>
         <div className="flex flex-col items-center justify-center p-24 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
-          <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-3" />
+          <Loader2 className="w-8 h-8 animate-spin text-slate-400 mb-3" />
           <span className="text-sm font-semibold text-slate-500">Loading employee attendance profile...</span>
         </div>
       </DashboardShell>
@@ -190,14 +190,12 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
 
         <div className="flex items-center gap-2">
           {/* Prominent Download Button */}
-          <Button
-            variant="primary"
-            size="sm"
+          <button
             onClick={handleDownloadPDF}
-            className="gap-2 shadow-lg shadow-blue-500/25 text-xs font-bold px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl cursor-pointer active:scale-95 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 text-xs font-bold shadow-xs active:scale-95 transition-all cursor-pointer"
           >
             <Download className="w-4 h-4" /> Download Attendance Report (PDF)
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -219,11 +217,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
                   {employee.name}
                 </h1>
                 <span
-                  className={`inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider border ${
-                    employee.role === 'admin'
-                      ? 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20'
-                      : 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20'
-                  }`}
+                  className="inline-block px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-slate-900 text-white dark:bg-white dark:text-slate-900 border border-slate-900 dark:border-white shadow-xs"
                 >
                   {employee.role === 'admin' ? 'Admin' : 'Staff'}
                 </span>
@@ -265,7 +259,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
             </div>
             <div className="px-4 py-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700/80 text-center min-w-[90px]">
               <p className="text-[10px] font-bold uppercase text-slate-400">Total Hours</p>
-              <p className="text-lg font-black font-mono text-blue-600 dark:text-blue-400 mt-0.5">
+              <p className="text-lg font-black font-mono text-slate-900 dark:text-white mt-0.5">
                 {totalHours.toFixed(1)}h
               </p>
             </div>
@@ -291,7 +285,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
           <div className="md:px-6 first:pl-0">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Days Present</p>
             <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white mt-1.5">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-blue-500" /> : totalPresent}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : totalPresent}
             </p>
           </div>
 
@@ -299,7 +293,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
           <div className="md:px-6">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Days Late</p>
             <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white mt-1.5">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-amber-500" /> : totalLate}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : totalLate}
             </p>
           </div>
 
@@ -307,7 +301,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
           <div className="md:px-6">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Days Absent</p>
             <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white mt-1.5">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-rose-500" /> : totalAbsent}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : totalAbsent}
             </p>
           </div>
 
@@ -315,7 +309,7 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
           <div className="md:px-6 last:pr-0">
             <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total Hours</p>
             <p className="text-2xl sm:text-3xl font-black font-mono text-slate-900 dark:text-white mt-1.5">
-              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-blue-500" /> : `${totalHours.toFixed(1)}h`}
+              {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-400" /> : `${totalHours.toFixed(1)}h`}
             </p>
           </div>
         </div>
@@ -338,11 +332,22 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={() => handleSetPreset('today')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
+                activePreset === 'today'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-bold'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+              }`}
+            >
+              Today
+            </button>
+            <button
+              type="button"
               onClick={() => handleSetPreset('this_month')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                 activePreset === 'this_month'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                  : 'bg-slate-50 dark:bg-[#060c1d]/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-bold'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
               }`}
             >
               This Month
@@ -352,8 +357,8 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
               onClick={() => handleSetPreset('last_month')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                 activePreset === 'last_month'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                  : 'bg-slate-50 dark:bg-[#060c1d]/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-bold'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
               }`}
             >
               Last Month
@@ -363,22 +368,11 @@ export default function EmployeeDetailPage({ params }: EmployeeDetailPageProps) 
               onClick={() => handleSetPreset('last_7_days')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
                 activePreset === 'last_7_days'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                  : 'bg-slate-50 dark:bg-[#060c1d]/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs font-bold'
+                  : 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
               }`}
             >
               Last 7 Days
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSetPreset('last_30_days')}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                activePreset === 'last_30_days'
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-sm font-bold'
-                  : 'bg-slate-50 dark:bg-[#060c1d]/60 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60'
-              }`}
-            >
-              Last 30 Days
             </button>
           </div>
         </div>
