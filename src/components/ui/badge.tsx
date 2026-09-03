@@ -16,14 +16,14 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, showDot = true
   return (
     <span
       className={twMerge(
-        'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors',
+        'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border transition-colors',
         badgeInfo.bg,
         badgeInfo.text,
         badgeInfo.border,
         className
       )}
     >
-      {showDot && <span className={clsx('w-1.5 h-1.5 rounded-full animate-pulse', badgeInfo.dot)} />}
+      {showDot && <span className={clsx('w-1.5 h-1.5 rounded-full', badgeInfo.dot)} />}
       {badgeInfo.label}
     </span>
   );
