@@ -75,8 +75,8 @@ export const PwaInstallPrompt: React.FC = () => {
       <div className="bg-slate-900/95 text-white backdrop-blur-xl border border-slate-700/80 rounded-3xl p-4 shadow-2xl space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center font-black text-white shadow-md shadow-blue-500/30 shrink-0">
-              <Sparkles className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-2xl bg-white text-slate-900 flex items-center justify-center font-bold shadow-xs shrink-0">
+              <Sparkles className="w-5 h-5 text-slate-900" />
             </div>
             <div>
               <p className="text-xs font-black">Install Mero Mobile App</p>

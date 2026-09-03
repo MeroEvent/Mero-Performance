@@ -158,11 +158,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, isOpenMobile = false, on
                 className={clsx(
                   'flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold transition-all',
                   pathname === '/admin'
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-black'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs font-bold'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                 )}
               >
-                <Building2 className="w-4 h-4 shrink-0" />
+                <Building2 className={clsx('w-4 h-4 shrink-0', pathname === '/admin' ? 'text-white dark:text-slate-900' : 'text-slate-400')} />
                 <span>Admin Overview</span>
               </Link>
             </div>
@@ -188,15 +188,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, isOpenMobile = false, on
                       className={clsx(
                         'w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer select-none text-left',
                         isAnyItemActive
-                          ? 'text-blue-600 dark:text-blue-400 bg-blue-500/5'
+                          ? 'text-slate-900 dark:text-white font-bold bg-slate-100 dark:bg-slate-800/60'
                           : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50'
                       )}
                     >
                       <div className="flex items-center gap-2.5">
-                        <GroupIcon className={clsx('w-4 h-4 shrink-0', isAnyItemActive ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400')} />
-                        <span className="truncate">{group.title}</span>
+                        <GroupIcon className={clsx('w-4 h-4', isAnyItemActive ? 'text-slate-900 dark:text-white' : 'text-slate-400')} />
+                        <span>{group.title}</span>
                       </div>
-                      <div className="text-slate-400 shrink-0">
+                      <div className="text-slate-400">
                         {isExpanded ? (
                           <ChevronDown className="w-3.5 h-3.5" />
                         ) : (
@@ -222,11 +222,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, isOpenMobile = false, on
                               className={clsx(
                                 'flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg text-xs transition-all font-medium',
                                 isActive
-                                  ? 'bg-blue-600 text-white font-bold shadow-xs'
+                                  ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-bold shadow-xs'
                                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/40'
                               )}
                             >
-                              <ItemIcon className={clsx('w-3.5 h-3.5 shrink-0', isActive ? 'text-white' : 'text-slate-400')} />
+                              <ItemIcon className={clsx('w-3.5 h-3.5 shrink-0', isActive ? 'text-white dark:text-slate-900' : 'text-slate-400')} />
                               <span className="truncate">{item.label}</span>
                             </Link>
                           );
@@ -253,11 +253,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, isOpenMobile = false, on
                   className={clsx(
                     'flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all',
                     isActive
-                      ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20 font-bold'
+                      ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xs font-bold'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60'
                   )}
                 >
-                  <Icon className={clsx('w-4 h-4 shrink-0', isActive ? 'text-white' : 'text-slate-400')} />
+                  <Icon className={clsx('w-4 h-4 shrink-0', isActive ? 'text-white dark:text-slate-900' : 'text-slate-400')} />
                   <span>{link.label}</span>
                 </Link>
               );
@@ -277,7 +277,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, isOpenMobile = false, on
   return (
     <>
       {/* Desktop Sidebar (Fixed) */}
-      <aside className="hidden md:flex w-64 border-r border-slate-200 dark:border-slate-800 flex-col h-screen sticky top-0 z-30 shrink-0 transition-colors duration-200">
+      <aside className="hidden md:flex w-64 border-r border-slate-200 dark:border-slate-800 flex-col h-full shrink-0 transition-colors duration-200">
         {sidebarContent}
       </aside>
 

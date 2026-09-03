@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { AttendanceRecord, UserProfile } from '@/types';
 import { formatTime } from '@/lib/utils/attendance';
 import { StatusBadge } from '@/components/ui/badge';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 import { 
   Clock, 
   MapPin, 
@@ -65,12 +66,18 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
     ? `Live check-ins for today (${displayRecords.length} logged)`
     : 'Current session tracking for today';
 
-  const handleClearAllToday = async () => {
-    if (!confirm('Dev Mode: Clear ALL employee attendance records for today?')) return;
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+  const handleClearAllToday = () => {
+    setShowClearConfirm(true);
+  };
+
+  const handleConfirmClearAll = async () => {
     setIsClearing(true);
     try {
       const res = await fetch('/api/attendance?all=true', { method: 'DELETE' });
       if (res.ok) {
+        setShowClearConfirm(false);
         if (onRefresh) onRefresh();
         else window.location.reload();
       }
@@ -86,20 +93,13 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
       {/* Clean Header Bar */}
       <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
         <div className="flex items-center gap-2.5">
-          <div className="p-2 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+          <div className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
             <Activity className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-slate-100">
-                {title}
-              </h3>
-              {displayRecords.length > 0 && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  {displayRecords.length}
-                </span>
-              )}
-            </div>
+            <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+              {title}
+            </h3>
             <p className="text-[11px] text-slate-400">
               {subtitle || defaultSubtitle}
             </p>
@@ -161,7 +161,7 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
                           className="w-10 h-10 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 font-black text-xs shadow-xs">
+                        <div className="w-10 h-10 rounded-full bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center shrink-0 font-bold text-xs shadow-xs">
                           {emp.name?.charAt(0) || 'U'}
                         </div>
                       )}
@@ -181,21 +181,23 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
                   {/* Clean 2-Column Timing Grid */}
                   <div className="grid grid-cols-2 gap-2 bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                        <LogIn className="w-3 h-3 text-emerald-500" /> Check In
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        Check In
                       </span>
-                      <p className="font-mono text-xs font-black text-slate-900 dark:text-slate-100">
+                      <p className="font-mono text-xs font-semibold text-slate-900 dark:text-slate-100">
                         {formatTime(record.check_in_time)}
                       </p>
                     </div>
 
                     <div className="space-y-0.5">
-                      <span className="text-[10px] font-bold text-slate-400 flex items-center gap-1">
-                        <LogOut className="w-3 h-3 text-rose-500" /> Check Out
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        Check Out
                       </span>
-                      <p className="font-mono text-xs font-black text-slate-900 dark:text-slate-100">
-                        {record.check_out_time ? formatTime(record.check_out_time) : (
-                          <span className="text-amber-500 font-bold text-xs">
+                      <p className="font-mono text-xs text-slate-900 dark:text-slate-100">
+                        {record.check_out_time ? (
+                          <span className="font-semibold">{formatTime(record.check_out_time)}</span>
+                        ) : (
+                          <span className="text-slate-400 font-sans text-xs">
                             In Progress
                           </span>
                         )}
@@ -204,13 +206,13 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
                   </div>
 
                   {/* Clean Bottom Metadata Footer */}
-                  <div className="flex items-center justify-between text-[10px] text-slate-500 pt-0.5">
-                    <div className="flex items-center gap-1.5 font-bold text-blue-600 dark:text-blue-400">
-                      <Timer className="w-3 h-3" />
-                      <span>{record.total_hours ? `${record.total_hours.toFixed(2)} hrs worked` : 'Active Session'}</span>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
+                    <div className="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-400 font-mono text-xs">
+                      <Timer className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{record.total_hours ? `${record.total_hours.toFixed(2)}h worked` : 'Running'}</span>
                     </div>
 
-                    <div className="flex items-center gap-2 text-slate-400">
+                    <div className="flex items-center gap-2 text-slate-400 text-[11px]">
                       <span className="flex items-center gap-1">
                         {dev.isMobile ? (
                           <Smartphone className="w-3 h-3 text-slate-400" />
@@ -220,8 +222,10 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
                         <span>{dev.name}</span>
                       </span>
 
+                      <span>·</span>
+
                       <span className="flex items-center gap-1">
-                        <MapPin className={`w-3 h-3 ${record.location_verified ? 'text-emerald-500' : 'text-slate-400'}`} />
+                        <MapPin className="w-3 h-3 text-slate-400" />
                         <span>{record.location_verified ? 'GPS' : 'Standard'}</span>
                       </span>
                     </div>
@@ -261,7 +265,7 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
                               className="w-8 h-8 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0"
                             />
                           ) : (
-                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 font-bold text-xs">
+                            <div className="w-8 h-8 rounded-full bg-slate-900 dark:bg-slate-800 text-white flex items-center justify-center shrink-0 font-bold text-xs">
                               {emp.name?.charAt(0) || 'U'}
                             </div>
                           )}
@@ -276,37 +280,41 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
                         </div>
                       </td>
 
-                      <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-slate-100">
+                      <td className="py-3 px-4 font-mono font-semibold text-slate-800 dark:text-slate-200">
                         {formatTime(record.check_in_time)}
                       </td>
 
-                      <td className="py-3 px-4 font-mono font-bold text-slate-900 dark:text-slate-100">
+                      <td className="py-3 px-4 font-mono text-slate-800 dark:text-slate-200">
                         {record.check_out_time ? (
-                          formatTime(record.check_out_time)
+                          <span className="font-semibold">{formatTime(record.check_out_time)}</span>
                         ) : (
-                          <span className="text-amber-500 font-bold">
+                          <span className="text-slate-400 dark:text-slate-500 font-sans text-xs">
                             In Progress
                           </span>
                         )}
                       </td>
 
-                      <td className="py-3 px-4 font-mono font-bold text-blue-600 dark:text-blue-400">
-                        {record.total_hours ? `${record.total_hours.toFixed(2)} hrs` : 'Running'}
+                      <td className="py-3 px-4 font-mono text-slate-700 dark:text-slate-300">
+                        {record.total_hours ? (
+                          <span className="font-semibold">{record.total_hours.toFixed(2)} hrs</span>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-500 font-sans text-xs">Running</span>
+                        )}
                       </td>
 
                       <td className="py-3 px-4">
                         <StatusBadge status={record.status} />
                       </td>
 
-                      <td className="py-3 px-4 text-[11px] text-slate-400">
+                      <td className="py-3 px-4 text-[11px] text-slate-500 dark:text-slate-400">
                         <div className="flex items-center gap-2">
-                          <span className="flex items-center gap-1">
-                            {dev.isMobile ? <Smartphone className="w-3.5 h-3.5 text-slate-400" /> : <Laptop className="w-3.5 h-3.5 text-slate-400" />}
+                          <span className="flex items-center gap-1 text-slate-400">
+                            {dev.isMobile ? <Smartphone className="w-3.5 h-3.5" /> : <Laptop className="w-3.5 h-3.5" />}
                             <span>{dev.name}</span>
                           </span>
-                          <span>·</span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className={`w-3.5 h-3.5 ${record.location_verified ? 'text-emerald-500' : 'text-slate-400'}`} />
+                          <span className="text-slate-300 dark:text-slate-700">·</span>
+                          <span className="flex items-center gap-1 text-slate-400">
+                            <MapPin className="w-3.5 h-3.5" />
                             <span>{record.location_verified ? 'GPS' : 'Standard'}</span>
                           </span>
                         </div>
@@ -319,6 +327,19 @@ export const TodayAttendanceTable: React.FC<TodayAttendanceTableProps> = ({
           </div>
         </>
       )}
+
+      {/* Dev Reset Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        onConfirm={handleConfirmClearAll}
+        title="Reset Today's Attendance"
+        description="Are you sure you want to clear all employee check-in and check-out records for today? This action is irreversible."
+        confirmText="Clear Today's Records"
+        cancelText="Cancel"
+        variant="danger"
+        isLoading={isClearing}
+      />
     </div>
   );
 };

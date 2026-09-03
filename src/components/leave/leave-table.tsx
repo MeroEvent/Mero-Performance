@@ -120,11 +120,16 @@ export const LeaveTable: React.FC<LeaveTableProps> = ({
                       <Button
                         size="sm"
                         variant="outline"
-                        className="px-2 py-1 text-xs text-rose-500 border-rose-500/30 hover:bg-rose-500/10"
+                        className="px-2 py-1 text-xs text-rose-500 border-rose-500/30 hover:bg-rose-500/10 cursor-pointer"
                         onClick={() => onCancel?.(r.id)}
                       >
                         Cancel
                       </Button>
+                    )}
+                    {r.status !== 'pending' && (
+                      <div className="text-[11px] text-slate-400">
+                        {r.reviewer_name ? `By ${r.reviewer_name}` : '—'}
+                      </div>
                     )}
                   </td>
                 </tr>

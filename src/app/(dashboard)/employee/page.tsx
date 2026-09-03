@@ -9,6 +9,7 @@ import { DEFAULT_USERS } from '@/lib/services/attendance-store';
 import { useAuth } from '@/lib/context/auth-context';
 import { UserProfile, AttendanceRecord } from '@/types';
 import { TodayAttendanceTable } from '@/components/attendance/today-attendance-table';
+import { UpcomingHolidaysWidget } from '@/components/dashboard/upcoming-holidays-widget';
 import { today as getTodayBS } from 'nepali-calendar-engine';
 
 export default function EmployeeDashboardPage() {
@@ -70,7 +71,7 @@ export default function EmployeeDashboardPage() {
     return (
       <DashboardShell>
         <div className="flex items-center justify-center p-24">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-slate-900 dark:border-white border-t-transparent rounded-full animate-spin"></div>
         </div>
       </DashboardShell>
     );
@@ -93,13 +94,18 @@ export default function EmployeeDashboardPage() {
         <CheckInWidget user={currentUser} onStatusChange={loadTodayRecord} />
       </div>
 
-      {/* Today's Attendance Log */}
-      <div className="mt-6">
-        <TodayAttendanceTable
-          todayRecord={todayRecord}
-          currentUser={currentUser}
-          onRefresh={loadTodayRecord}
-        />
+      {/* Content Grid: Today's Log + Upcoming Public Holidays */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
+        <div className="xl:col-span-2">
+          <TodayAttendanceTable
+            todayRecord={todayRecord}
+            currentUser={currentUser}
+            onRefresh={loadTodayRecord}
+          />
+        </div>
+        <div className="xl:col-span-1">
+          <UpcomingHolidaysWidget />
+        </div>
       </div>
     </DashboardShell>
   );

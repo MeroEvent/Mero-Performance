@@ -64,16 +64,16 @@ export const HolidayCalendar: React.FC<HolidayCalendarProps> = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {holidays.map((h) => (
-          <Card key={h.id} className="relative p-5 hover:border-blue-500/40 transition-all flex flex-col justify-between">
+          <Card key={h.id} className="relative p-5 hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between">
             <div>
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                     <CalendarIcon className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm">{h.name}</h4>
-                    <p className="font-mono text-xs text-blue-600 dark:text-blue-400 font-semibold mt-0.5">
+                    <p className="font-mono text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                       {formatDateDisplay(h.date)}
                     </p>
                   </div>

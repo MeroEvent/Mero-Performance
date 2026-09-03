@@ -55,7 +55,7 @@ export const AttendanceCalendar: React.FC<AttendanceCalendarProps> = ({ records 
       case 'very_late':
         return 'bg-orange-500/15 text-orange-700 dark:text-orange-300 border border-orange-500/30 hover:bg-orange-500/25';
       case 'half_day':
-        return 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30 hover:bg-indigo-500/25';
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700';
       case 'absent':
       default:
         return 'bg-rose-500/15 text-rose-700 dark:text-rose-300 border border-rose-500/30 hover:bg-rose-500/25';
@@ -70,7 +70,7 @@ export const AttendanceCalendar: React.FC<AttendanceCalendarProps> = ({ records 
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <CalendarIcon className="w-5 h-5 text-blue-500" />
+              <CalendarIcon className="w-5 h-5 text-slate-400" />
               Attendance Calendar
             </CardTitle>
             <CardDescription>Color-coded view of daily check-ins and attendance records</CardDescription>

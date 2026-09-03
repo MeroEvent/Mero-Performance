@@ -1,4 +1,4 @@
-import { LeaveTypeConfig, LeaveBalance, LeaveRequest, LeaveStatus } from '@/types';
+import { LeaveTypeConfig, LeaveBalance, LeaveRequest } from '@/types';
 import { AttendanceService } from './attendance-store';
 
 export const DEFAULT_LEAVE_TYPES: LeaveTypeConfig[] = [

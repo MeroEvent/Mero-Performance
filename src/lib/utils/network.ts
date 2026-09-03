@@ -36,31 +36,10 @@ export function isLoopbackIp(value?: string | null): boolean {
   return ip === 'localhost' || ip === '::1' || ip === '127.0.0.1' || ip.startsWith('127.');
 }
 
-function ipv4ToNumber(value: string): number | null {
-  const parts = value.split('.');
-  if (parts.length !== 4) return null;
-
-  const octets = parts.map((part) => {
-    if (!/^\d+$/.test(part)) return null;
-    const octet = Number(part);
-    return octet >= 0 && octet <= 255 ? octet : null;
-  });
-
-  if (octets.some((octet) => octet === null)) return null;
-
-  return (
-    ((octets[0] as number) * 256 ** 3) +
-    ((octets[1] as number) * 256 ** 2) +
-    ((octets[2] as number) * 256) +
-    (octets[3] as number)
-  );
-}
-
 export function expandIpv6Address(ip: string): string | null {
   const normalized = normalizeIpAddress(ip).toLowerCase();
   if (!normalized.includes(':')) return null;
 
-  // Split off CIDR if present
   const baseIp = normalized.includes('/') ? normalized.split('/')[0] : normalized;
 
   let parts = baseIp.split(':');
@@ -79,7 +58,7 @@ export function expandIpv6Address(ip: string): string | null {
 }
 
 export function isIpv6SubnetMatch(clientIp: string, allowedEntry: string): boolean {
-  let [networkPart, prefixStr] = allowedEntry.split('/');
+  const [networkPart, prefixStr] = allowedEntry.split('/');
   // Default to /64 (the standard residential/office ISP subnet allocation)
   let prefixBits = prefixStr ? parseInt(prefixStr, 10) : 64;
 

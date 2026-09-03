@@ -3,8 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { 
   calculateCheckInStatus, 
   calculateHoursWorked, 
-  evaluateWorkdayStatus,
-  getNepalDateString,
+  getNepalDateString, 
   getNepalTimeString 
 } from '@/lib/utils/attendance';
 import { isIpAllowed, isLoopbackIp, normalizeIpAddress } from '@/lib/utils/network';
@@ -201,19 +200,39 @@ export async function GET(req: NextRequest) {
       .limit(1)
       .maybeSingle();
 
-    if (openRecord) {
-      return NextResponse.json({ record: openRecord });
-    }
+    // 2. Otherwise get today's record and status metadata
+    const [recordRes, holidayRes, leaveRes] = await Promise.all([
+      supabase
+        .from('attendance_records')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('date', date)
+        .maybeSingle(),
+      supabase
+        .from('holidays')
+        .select('*')
+        .eq('date', date)
+        .maybeSingle(),
+      supabase
+        .from('leave_requests')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'approved')
+        .lte('start_date', date)
+        .gte('end_date', date)
+        .maybeSingle(),
+    ]);
 
-    // 2. Otherwise get today's record
-    const { data: record } = await supabase
-      .from('attendance_records')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('date', date)
-      .maybeSingle();
+    const [dYear, dMonth, dDay] = date.split('-').map(Number);
+    const dayOfWeek = new Date(Date.UTC(dYear, dMonth - 1, dDay)).getUTCDay();
+    const isWeekend = dayOfWeek === 6;
 
-    return NextResponse.json({ record: record || null });
+    return NextResponse.json({ 
+      record: openRecord || recordRes.data || null,
+      holiday: holidayRes.data || null,
+      isWeekend,
+      approvedLeave: leaveRes.data || null,
+    });
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Failed to fetch attendance' }, { status: 500 });
   }
@@ -236,8 +255,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
-    // A. Parallelize all initial database reads into 1 single round-trip
-    const [profileRes, rulesRes, locsRes, existingTodayRes, unclosedRes] = await Promise.all([
+    // A. Parallelize all initial database reads into 1 single round-trip (including Holiday & Leave checks)
+    const [profileRes, rulesRes, locsRes, existingTodayRes, unclosedRes, holidayRes, leaveRes] = await Promise.all([
       supabase
         .from('user_profiles')
         .select('*, shift:shifts(*)')
@@ -264,11 +283,62 @@ export async function POST(req: NextRequest) {
         .is('check_out_time', null)
         .limit(1)
         .maybeSingle(),
+      supabase
+        .from('holidays')
+        .select('*')
+        .eq('date', todayStr)
+        .maybeSingle(),
+      supabase
+        .from('leave_requests')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('status', 'approved')
+        .lte('start_date', todayStr)
+        .gte('end_date', todayStr)
+        .maybeSingle(),
     ]);
 
     const userProfile = profileRes.data;
     if (profileRes.error || !userProfile) {
       return NextResponse.json({ error: 'User profile not found' }, { status: 404 });
+    }
+
+    // B. HOLIDAY, WEEKEND & APPROVED LEAVE GUARDS
+    const todayHoliday = holidayRes.data;
+    if (todayHoliday) {
+      return NextResponse.json(
+        {
+          error: `Check-in Blocked: Today is an official public holiday (${todayHoliday.name}). Office is closed and attendance check-in is not permitted.`,
+          isHolidayError: true,
+          holidayName: todayHoliday.name,
+        },
+        { status: 403 }
+      );
+    }
+
+    const [tYear, tMonth, tDay] = todayStr.split('-').map(Number);
+    const dayOfWeek = new Date(Date.UTC(tYear, tMonth - 1, tDay)).getUTCDay();
+    const isSaturday = dayOfWeek === 6;
+    if (isSaturday) {
+      return NextResponse.json(
+        {
+          error: 'Check-in Blocked: Today is Saturday (Weekly Off). Office is closed and attendance check-in is not permitted.',
+          isWeekendError: true,
+        },
+        { status: 403 }
+      );
+    }
+
+    const approvedLeave = leaveRes.data;
+    if (approvedLeave) {
+      return NextResponse.json(
+        {
+          error: `Check-in Blocked: You have an approved ${approvedLeave.leave_type.toUpperCase()} leave scheduled for today. You are excused from office check-in.`,
+          isLeaveError: true,
+          leaveType: approvedLeave.leave_type,
+        },
+        { status: 403 }
+      );
     }
 
     const companyRules = rulesRes.data;
@@ -327,7 +397,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // C2. ANTI-PROXY / BUDDY PUNCHING DEVICE & HARDWARE GUARD
     // Check if Single Device Policy is enabled in Company Rules (stored in Supabase DB)
     const rawAllowedIps: string[] = Array.isArray(companyRules?.allowed_ips) ? companyRules.allowed_ips : [];
     const isSingleDevicePolicyActive = !rawAllowedIps.includes('__CONFIG__:ALLOW_SHARED_DEVICE');
@@ -713,7 +782,101 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// 4. DELETE (DEV TESTING: Clear today's attendance record so admin/employee can test check-in again)
+// 4. PATCH (ADMIN MANUAL ATTENDANCE OVERRIDE / ADJUSTMENT)
+export async function PATCH(req: NextRequest) {
+  try {
+    const supabase = getAdminSupabase();
+    const body = await req.json();
+    const { 
+      recordId, 
+      status, 
+      checkInTime, 
+      checkOutTime, 
+      totalHours, 
+      reason, 
+      editorId, 
+      editorName 
+    } = body;
+
+    if (!recordId) {
+      return NextResponse.json({ error: 'Record ID is required' }, { status: 400 });
+    }
+    if (!reason || !reason.trim()) {
+      return NextResponse.json({ error: 'A mandatory reason is required for attendance adjustments.' }, { status: 400 });
+    }
+
+    // Fetch existing record before adjustment
+    const { data: existing, error: fetchErr } = await supabase
+      .from('attendance_records')
+      .select('*')
+      .eq('id', recordId)
+      .single();
+
+    if (fetchErr || !existing) {
+      return NextResponse.json({ error: 'Attendance record not found.' }, { status: 404 });
+    }
+
+    const now = new Date().toISOString();
+
+    // 1. Update attendance record in Supabase
+    const { data: updated, error: updErr } = await supabase
+      .from('attendance_records')
+      .update({
+        status,
+        check_in_time: checkInTime || existing.check_in_time,
+        check_out_time: checkOutTime !== undefined ? checkOutTime : existing.check_out_time,
+        total_hours: totalHours !== undefined ? totalHours : existing.total_hours,
+        edited_by: editorId || null,
+        edit_reason: reason.trim(),
+        updated_at: now,
+      })
+      .eq('id', recordId)
+      .select()
+      .single();
+
+    if (updErr) {
+      throw updErr;
+    }
+
+    // 2. Insert audit log record in Supabase
+    try {
+      await supabase.from('audit_logs').insert({
+        company_id: existing.company_id || 'c0000000-0000-0000-0000-000000000001',
+        entity_type: 'attendance',
+        entity_id: recordId,
+        action: 'override',
+        changed_by: editorId,
+        old_value: {
+          status: existing.status,
+          total_hours: existing.total_hours,
+          check_in_time: existing.check_in_time,
+          check_out_time: existing.check_out_time,
+        },
+        new_value: {
+          status,
+          total_hours: totalHours,
+          check_in_time: checkInTime,
+          check_out_time: checkOutTime,
+          reason: reason.trim(),
+        },
+        reason: reason.trim(),
+        created_at: now,
+      });
+    } catch (auditErr) {
+      console.warn('Non-fatal: Failed to write audit log to Supabase:', auditErr);
+    }
+
+    return NextResponse.json({
+      success: true,
+      record: updated,
+    });
+  } catch (err: any) {
+    console.error('Attendance adjustment error:', err);
+    return NextResponse.json({ error: err.message || 'Failed to adjust attendance' }, { status: 500 });
+  }
+}
+
+// 5. DELETE (DEV TESTING: Clear today's attendance record so admin/employee can test check-in again)
 export async function DELETE(req: NextRequest) {
   try {
     const supabase = getAdminSupabase();

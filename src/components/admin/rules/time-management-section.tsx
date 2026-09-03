@@ -339,14 +339,14 @@ export const TimeManagementSection: React.FC<TimeManagementSectionProps> = ({
                 key={day}
                 type="button"
                 onClick={() => toggleWorkDay(day)}
-                className={`px-4 py-2.5 rounded-2xl text-xs font-extrabold border transition-all cursor-pointer flex flex-col items-center min-w-[70px] ${
+                className={`px-4 py-2.5 rounded-2xl text-xs font-bold border transition-all cursor-pointer flex flex-col items-center min-w-[70px] ${
                   isSelected
-                    ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20 scale-105'
-                    : 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                    ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs'
+                    : 'bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-300'
                 }`}
               >
                 <span className="text-sm">{label}</span>
-                <span className={`text-[10px] ${isSelected ? 'text-blue-100' : 'text-slate-500'}`}>{full}</span>
+                <span className={`text-[10px] ${isSelected ? 'text-slate-300 dark:text-slate-600' : 'text-slate-400'}`}>{full}</span>
               </button>
             );
           })}

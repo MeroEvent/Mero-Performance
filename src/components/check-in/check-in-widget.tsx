@@ -1,11 +1,24 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { UserProfile, AttendanceRecord } from '@/types';
+import { UserProfile } from '@/types';
 import { formatDuration, formatTime } from '@/lib/utils/attendance';
 import { fetchBrowserPublicIp } from '@/lib/utils/network';
 import { getDeviceFingerprint } from '@/lib/utils/device';
-import { Clock, LogIn, LogOut, CheckCircle2, AlertCircle, Laptop, Globe, Building2, MapPin, ShieldAlert, Smartphone, RotateCcw, Trash2, Timer } from 'lucide-react';
+import { 
+  Clock, 
+  LogIn, 
+  LogOut, 
+  CheckCircle2, 
+  AlertCircle, 
+  Globe, 
+  ShieldAlert, 
+  RotateCcw, 
+  Palmtree, 
+  Coffee, 
+  Umbrella,
+  Sparkles
+} from 'lucide-react';
 import { StatusBadge } from '@/components/ui/badge';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
@@ -17,9 +30,14 @@ interface CheckInWidgetProps {
 
 export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChange }) => {
   const [todayRecord, setTodayRecord] = useState<any | null>(null);
+  const [todayHoliday, setTodayHoliday] = useState<any | null>(null);
+  const [isWeekend, setIsWeekend] = useState<boolean>(false);
+  const [approvedLeave, setApprovedLeave] = useState<any | null>(null);
+
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [feedbackMessage, setFeedbackMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  
   const [networkBlockModal, setNetworkBlockModal] = useState<{
     isOpen: boolean;
     message: string;
@@ -75,6 +93,10 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
     try {
       const res = await fetch(`/api/attendance?userId=${user.id}`);
       const data = await res.json();
+      setTodayHoliday(data.holiday || null);
+      setIsWeekend(Boolean(data.isWeekend));
+      setApprovedLeave(data.approvedLeave || null);
+
       if (data.record) {
         setTodayRecord(data.record);
         if (data.record.check_in_time && !data.record.check_out_time) {
@@ -178,21 +200,22 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
     if (actionType === 'check_in') {
       try {
         const device = getDeviceFingerprint();
-        const [coords, publicNetwork] = await Promise.all([
+        const [location, publicNetwork] = await Promise.all([
           getPosition(),
           getFreshNetwork(),
         ]);
+
         const res = await fetch('/api/attendance', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             userId: user.id,
-            lat: coords.lat,
-            lng: coords.lng,
-            networkIp: publicNetwork?.ip,
+            lat: location.lat,
+            lng: location.lng,
+            deviceInfo: `${device.deviceName} | ${device.hardwareId} | ${device.deviceId}`,
             deviceId: device.deviceId,
             hardwareId: device.hardwareId,
-            deviceInfo: device.formattedDeviceInfo,
+            networkIp: publicNetwork?.ip,
           }),
         });
 
@@ -307,16 +330,16 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
     }
   };
 
-  const isCheckedIn = Boolean(todayRecord && todayRecord.check_in_time && !todayRecord.check_out_time);
-  const isCompletedToday = Boolean(todayRecord && todayRecord.check_in_time && todayRecord.check_out_time);
+  const isCheckedIn = !!(todayRecord?.check_in_time && !todayRecord?.check_out_time);
+  const isCompletedToday = !!(todayRecord?.check_in_time && todayRecord?.check_out_time);
 
+  // Admin Quick Authorize Network IP
   const [isAuthorizingIp, setIsAuthorizingIp] = useState(false);
-
-  const handleQuickAuthorizeNetwork = async () => {
+  const handleAuthorizeCurrentIp = async () => {
     if (!networkBlockModal.currentIp) return;
     setIsAuthorizingIp(true);
     try {
-      const res = await fetch('/api/admin/company-rules', {
+      const res = await fetch('/api/admin/settings/allow-ip', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ addIp: networkBlockModal.currentIp }),
@@ -337,7 +360,7 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
   };
 
   return (
-    <div className="bg-gradient-to-br from-white via-slate-50 to-blue-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 border border-slate-200/80 dark:border-slate-800 text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-lg dark:shadow-2xl relative overflow-hidden transition-all duration-300">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden transition-all duration-300">
       {feedbackMessage && (
         <div
           className={`mb-4 p-3.5 rounded-2xl text-xs font-semibold flex items-center gap-2 ${
@@ -355,19 +378,86 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
         </div>
       )}
 
+      {/* Holiday / Weekend / Leave Banner Notification (If not checked in) */}
+      {!isCheckedIn && !isCompletedToday && todayHoliday && (
+        <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+                Official Public Holiday
+              </span>
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300">
+                {todayHoliday.is_paid !== false ? 'Paid Holiday' : 'Holiday'}
+              </span>
+            </div>
+            <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+              {todayHoliday.name}
+            </p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Office is closed today. Attendance punch is not required.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!isCheckedIn && !isCompletedToday && !todayHoliday && isWeekend && (
+        <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
+            <Coffee className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Saturday • Weekly Off
+            </span>
+            <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+              Enjoy your weekend! Office is closed today.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {!isCheckedIn && !isCompletedToday && !todayHoliday && !isWeekend && approvedLeave && (
+        <div className="mb-6 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/70 flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 flex items-center justify-center shrink-0">
+            <Umbrella className="w-5 h-5" />
+          </div>
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400">
+              Approved Leave ({approvedLeave.leave_type.toUpperCase()})
+            </span>
+            <p className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+              You are officially on leave today: {approvedLeave.reason || 'Excused from office'}
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
         {/* Left Info Column */}
         <div className="flex-1 text-center md:text-left space-y-2">
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              {isCheckedIn ? 'Session Active' : isCompletedToday ? 'Shift Completed' : 'Daily Attendance'}
+              {isCheckedIn
+                ? 'Session Active'
+                : isCompletedToday
+                ? 'Shift Completed'
+                : todayHoliday
+                ? 'Official Holiday'
+                : isWeekend
+                ? 'Weekly Off'
+                : approvedLeave
+                ? 'On Approved Leave'
+                : 'Daily Attendance'}
             </h2>
             {todayRecord && (
               <button
                 onClick={handleResetToday}
                 disabled={isLoading}
                 title="Dev Mode: Reset today's attendance to test again"
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 transition-all hover:scale-105 active:scale-95 cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
               >
                 <RotateCcw className={`w-3 h-3 ${isLoading ? 'animate-spin' : ''}`} />
                 <span>Reset Today (Dev)</span>
@@ -380,6 +470,12 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
               ? 'Your check-in timer is currently active.'
               : isCompletedToday
               ? `Checked out at ${formatTime(todayRecord?.check_out_time)}.`
+              : todayHoliday
+              ? `Happy ${todayHoliday.name}! Office is closed and punch-in is not required.`
+              : isWeekend
+              ? 'Today is Saturday (Weekly Off). No punch required.'
+              : approvedLeave
+              ? 'You are on approved leave today.'
               : 'Tap Check In to record your attendance.'}
           </p>
 
@@ -426,66 +522,113 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
             <button
               onClick={triggerCheckOutConfirmation}
               disabled={isLoading}
-              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-rose-600 via-red-600 to-orange-500 p-1 shadow-xl hover:shadow-rose-500/40 active:scale-95 transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-900"
+              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-rose-600 hover:bg-rose-700 active:scale-95 shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-800"
             >
-              <div className="w-full h-full rounded-full bg-slate-900/10 dark:bg-slate-900/20 group-hover:bg-transparent flex flex-col items-center justify-center transition-colors">
-                <LogOut className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-2 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-lg sm:text-xl font-extrabold text-white tracking-wide">CHECK OUT</span>
+              <div className="flex flex-col items-center justify-center">
+                <LogOut className="w-10 h-10 sm:w-11 sm:h-11 text-white mb-2 group-hover:scale-105 transition-transform duration-200" />
+                <span className="text-base sm:text-lg font-black text-white tracking-wider">CHECK OUT</span>
               </div>
             </button>
           ) : isCompletedToday ? (
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 p-1 shadow-xl flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-900">
-              <div className="w-full h-full rounded-full bg-slate-900/10 flex flex-col items-center justify-center p-4">
-                <CheckCircle2 className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-1.5" />
-                <span className="text-sm font-extrabold text-white uppercase tracking-wider">Completed</span>
-                <span className="text-[11px] text-emerald-100 font-medium mt-0.5">
-                  {Number(todayRecord?.total_hours || 0).toFixed(2)} hrs logged
-                </span>
-              </div>
+            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <CheckCircle2 className="w-10 h-10 sm:w-11 sm:h-11 text-emerald-400 mb-1.5" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">Completed</span>
+              <span className="text-[11px] text-slate-300 font-medium mt-0.5 font-mono">
+                {Number(todayRecord?.total_hours || 0).toFixed(2)} hrs logged
+              </span>
+            </div>
+          ) : todayHoliday ? (
+            /* Holiday Lock Badge */
+            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Palmtree className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">Holiday</span>
+              <span className="text-[11px] text-slate-300 font-medium mt-0.5 line-clamp-1 max-w-[120px]">
+                {todayHoliday.name}
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase mt-1">
+                Office Closed
+              </span>
+            </div>
+          ) : isWeekend ? (
+            /* Weekend / Saturday Lock Badge */
+            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Coffee className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">Weekly Off</span>
+              <span className="text-[11px] text-slate-300 font-medium mt-0.5">
+                Saturday
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase mt-1">
+                Office Closed
+              </span>
+            </div>
+          ) : approvedLeave ? (
+            /* Approved Leave Lock Badge */
+            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Umbrella className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">On Leave</span>
+              <span className="text-[11px] text-slate-300 font-medium mt-0.5">
+                {approvedLeave.leave_type.toUpperCase()}
+              </span>
+              <span className="text-[10px] text-slate-400 font-semibold uppercase mt-1">
+                Excused
+              </span>
             </div>
           ) : (
             <button
               onClick={triggerCheckInConfirmation}
               disabled={isLoading}
-              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-500 p-1 shadow-xl hover:shadow-blue-500/40 active:scale-95 transition-all duration-300 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-900"
+              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 active:scale-95 shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-800"
             >
-              <div className="w-full h-full rounded-full bg-slate-900/10 dark:bg-slate-900/20 group-hover:bg-transparent flex flex-col items-center justify-center transition-colors">
-                <LogIn className="w-10 h-10 sm:w-12 sm:h-12 text-white mb-2 group-hover:scale-110 transition-transform duration-300" />
-                <span className="text-lg sm:text-xl font-extrabold text-white tracking-wide">CHECK IN</span>
+              <div className="flex flex-col items-center justify-center">
+                <LogIn className="w-10 h-10 sm:w-11 sm:h-11 text-white dark:text-slate-900 mb-2 group-hover:scale-105 transition-transform duration-200" />
+                <span className="text-base sm:text-lg font-black tracking-wider">CHECK IN</span>
               </div>
             </button>
           )}
         </div>
       </div>
 
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal before Check-In / Check-Out */}
       <Modal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
-        title={confirmModal.type === 'check_in' ? 'Confirm Check In' : 'Confirm Check Out'}
+        title={confirmModal.type === 'check_in' ? 'Confirm Check-In' : 'Confirm Check-Out'}
+        className="max-w-md"
       >
         <div className="space-y-4">
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-            {confirmModal.type === 'check_in'
-              ? 'Are you ready to check in for today? Your start time and location will be recorded.'
-              : 'Are you sure you want to check out? Your session timer will stop and total work duration will be calculated.'}
-          </p>
+          <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200 dark:border-slate-700 flex items-start gap-3">
+            {confirmModal.type === 'check_in' ? (
+              <LogIn className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+            ) : (
+              <LogOut className="w-5 h-5 text-rose-500 shrink-0 mt-0.5" />
+            )}
+            <div>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">
+                {confirmModal.type === 'check_in'
+                  ? 'Ready to start your work shift?'
+                  : 'Ready to finish and submit your work hours?'}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                {confirmModal.type === 'check_in'
+                  ? 'Your exact arrival timestamp, location, and device verification will be recorded.'
+                  : 'This will end your shift session for today and calculate your final logged hours.'}
+              </p>
+            </div>
+          </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center justify-end gap-2 pt-2">
             <Button
-              type="button"
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
             >
               Cancel
             </Button>
             <Button
-              type="button"
               variant={confirmModal.type === 'check_in' ? 'primary' : 'danger'}
               size="sm"
               onClick={handleConfirmAction}
-              isLoading={isLoading}
+              className="gap-1.5"
             >
               {confirmModal.type === 'check_in' ? 'Yes, Check In' : 'Yes, Check Out'}
             </Button>
@@ -493,100 +636,31 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
         </div>
       </Modal>
 
+      {/* High-Tech Processing / Verifying Loader Modal */}
       <Modal
-        isOpen={networkBlockModal.isOpen}
-        onClose={() => setNetworkBlockModal({ isOpen: false, message: '', action: 'check_out' })}
-        title="Connect to Allowed Network"
+        isOpen={processingModal.isOpen}
+        onClose={() => {}}
+        title=""
+        className="max-w-xs text-center py-6"
       >
-        <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-800 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
-            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
-            <div className="space-y-1">
-              <p className="text-sm font-bold">Attendance action blocked from this network.</p>
-              <p className="text-xs leading-relaxed text-rose-700 dark:text-rose-300">
-                {networkBlockModal.message}
-              </p>
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full border-4 border-blue-500/20 border-t-blue-600 animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              {processingModal.type === 'check_in' ? (
+                <LogIn className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              ) : (
+                <LogOut className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+              )}
             </div>
           </div>
-
-          {networkBlockModal.currentIp && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/40">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                Current Network IP
-              </span>
-              <p className="mt-1 break-all font-mono text-sm font-black text-slate-900 dark:text-white">
-                {networkBlockModal.currentIp}
-              </p>
-            </div>
-          )}
-
-          <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-300">
-            Please connect to the authorized office WiFi network, then press {networkBlockModal.action === 'check_in' ? 'Check In' : 'Check Out'} again.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
-            {user.role === 'admin' && networkBlockModal.currentIp ? (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                isLoading={isAuthorizingIp}
-                onClick={handleQuickAuthorizeNetwork}
-                className="text-xs border-blue-500/40 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 font-bold"
-              >
-                <Globe className="w-3.5 h-3.5 mr-1 text-blue-500" />
-                Authorize This Office Network
-              </Button>
-            ) : <div />}
-
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => setNetworkBlockModal({ isOpen: false, message: '', action: 'check_out' })}
-            >
-              OK
-            </Button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Proxy / Buddy Punching Device Block Modal */}
-      <Modal
-        isOpen={proxyBlockModal.isOpen}
-        onClose={() => setProxyBlockModal({ isOpen: false, message: '' })}
-        title="Proxy Check-In Blocked"
-      >
-        <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-900 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-200">
-            <ShieldAlert className="mt-0.5 h-6 w-6 shrink-0 text-rose-600 dark:text-rose-400" />
-            <div className="space-y-1">
-              <p className="text-sm font-bold">Multi-Account Check-in Blocked on This Device</p>
-              <p className="text-xs leading-relaxed text-rose-700 dark:text-rose-300">
-                {proxyBlockModal.message}
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-950/40 space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <Smartphone className="w-4 h-4 text-blue-500" />
-              <span>Anti-Proxy Security Policy:</span>
-            </div>
-            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              To prevent attendance fraud, each employee must check in using their own personal smartphone or workstation. One device cannot be used to check in for multiple colleagues.
+          <div>
+            <h3 className="text-base font-extrabold text-slate-900 dark:text-white">
+              {processingModal.type === 'check_in' ? 'Verifying & Checking In...' : 'Closing Session & Checking Out...'}
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Synchronizing with server security policies
             </p>
-          </div>
-
-          <div className="flex justify-end pt-2">
-            <Button
-              type="button"
-              variant="primary"
-              size="sm"
-              onClick={() => setProxyBlockModal({ isOpen: false, message: '' })}
-            >
-              Understood
-            </Button>
           </div>
         </div>
       </Modal>
@@ -594,36 +668,28 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
       {/* Early Check-In Window Block Modal */}
       <Modal
         isOpen={earlyCheckInModal.isOpen}
-        onClose={() => setEarlyCheckInModal({ isOpen: false, message: '' })}
-        title="Check-In Window Not Open Yet"
+        onClose={() => setEarlyCheckInModal({ ...earlyCheckInModal, isOpen: false })}
+        title="Check-In Window Not Open"
+        className="max-w-md"
       >
         <div className="space-y-4">
-          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-200">
-            <Timer className="mt-0.5 h-6 w-6 shrink-0 text-amber-600 dark:text-amber-400" />
-            <div className="space-y-1">
-              <p className="text-sm font-bold">Shift Has Not Started Yet</p>
-              <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+          <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-3">
+            <Clock className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-bold text-amber-700 dark:text-amber-300">
+                Early Check-In Policy Active
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
                 {earlyCheckInModal.message}
               </p>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3.5 dark:border-slate-800 dark:bg-slate-950/40 space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
-              <Clock className="w-4 h-4 text-blue-500" />
-              <span>Company Punctuality Policy:</span>
-            </div>
-            <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-              Check-in is permitted starting {earlyCheckInModal.earlyWindowMinutes || 15} minutes prior to your official shift start time ({earlyCheckInModal.shiftStartTime || '10:00 AM'}). Please check in after {earlyCheckInModal.allowedFromTime || '09:55 AM'}.
-            </p>
-          </div>
-
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end">
             <Button
-              type="button"
               variant="primary"
               size="sm"
-              onClick={() => setEarlyCheckInModal({ isOpen: false, message: '' })}
+              onClick={() => setEarlyCheckInModal({ ...earlyCheckInModal, isOpen: false })}
             >
               Understood
             </Button>
@@ -631,44 +697,85 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
         </div>
       </Modal>
 
-      {/* High-Tech Animated Processing Loader ("Checking In..." / "Checking Out...") */}
-      {processingModal.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md animate-fade-in p-4">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl text-center space-y-6 animate-scale-up">
-            <div className="relative mx-auto w-20 h-20 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border-4 border-blue-600/20 animate-ping" />
-              <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin" />
-              {processingModal.type === 'check_in' ? (
-                <LogIn className="w-8 h-8 text-blue-600 dark:text-blue-400 animate-pulse" />
-              ) : (
-                <LogOut className="w-8 h-8 text-rose-600 dark:text-rose-400 animate-pulse" />
-              )}
-            </div>
-
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
-                {processingModal.type === 'check_in' ? 'Checking In...' : 'Checking Out...'}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                {processingModal.type === 'check_in'
-                  ? 'Verifying device fingerprint, network security, and recording attendance...'
-                  : 'Calculating worked hours and finalizing session in database...'}
+      {/* Proxy / Shared Device Hardware Guard Modal */}
+      <Modal
+        isOpen={proxyBlockModal.isOpen}
+        onClose={() => setProxyBlockModal({ ...proxyBlockModal, isOpen: false })}
+        title="Hardware Security Policy"
+        className="max-w-md"
+      >
+        <div className="space-y-4">
+          <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-3">
+            <ShieldAlert className="w-6 h-6 text-rose-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-bold text-rose-700 dark:text-rose-300">
+                Single Device Rule Violation
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                {proxyBlockModal.message}
               </p>
             </div>
+          </div>
 
-            <div className="p-3.5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-100 dark:border-slate-800 text-left space-y-2">
-              <div className="flex items-center gap-2 text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
-                <span>Device Fingerprint Verified</span>
-              </div>
-              <div className="flex items-center gap-2 text-[11px] font-bold text-blue-600 dark:text-blue-400">
-                <div className="w-3.5 h-3.5 rounded-full border-2 border-blue-600 border-t-transparent animate-spin shrink-0" />
-                <span>Recording in Supabase Database...</span>
-              </div>
-            </div>
+          <div className="flex justify-end">
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setProxyBlockModal({ ...proxyBlockModal, isOpen: false })}
+            >
+              Close
+            </Button>
           </div>
         </div>
-      )}
+      </Modal>
+
+      {/* Network / WiFi Block Modal */}
+      <Modal
+        isOpen={networkBlockModal.isOpen}
+        onClose={() => setNetworkBlockModal({ ...networkBlockModal, isOpen: false })}
+        title="Unauthorized Network"
+        className="max-w-md"
+      >
+        <div className="space-y-4">
+          <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-start gap-3">
+            <Globe className="w-6 h-6 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-xs font-bold text-amber-700 dark:text-amber-300">
+                Office WiFi Network Required
+              </p>
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
+                {networkBlockModal.message}
+              </p>
+              {networkBlockModal.currentIp && (
+                <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-2">
+                  Detected Network IP: <span className="font-bold text-slate-700 dark:text-slate-200">{networkBlockModal.currentIp}</span>
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2">
+            {user.role === 'admin' && networkBlockModal.currentIp && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAuthorizeCurrentIp}
+                disabled={isAuthorizingIp}
+                className="text-xs border-amber-500/30 text-amber-600 dark:text-amber-400"
+              >
+                {isAuthorizingIp ? 'Authorizing...' : 'Admin: Whitelist This IP'}
+              </Button>
+            )}
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => setNetworkBlockModal({ ...networkBlockModal, isOpen: false })}
+            >
+              Understood
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };

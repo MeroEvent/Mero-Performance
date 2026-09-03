@@ -170,62 +170,57 @@ export function formatDateDisplay(dateVal: string | Date): string {
 /**
  * Returns color tokens and human label for an attendance status.
  */
-export function getStatusBadge(status: AttendanceStatus) {
+export function getStatusBadge(status: AttendanceStatus | string) {
   switch (status) {
     case 'on_time':
+    case 'present':
       return {
-        bg: 'bg-emerald-500/10 dark:bg-emerald-500/20',
-        text: 'text-emerald-700 dark:text-emerald-400',
-        border: 'border-emerald-500/30',
+        bg: 'bg-emerald-50/80 dark:bg-emerald-950/30',
+        text: 'text-emerald-700 dark:text-emerald-300',
+        border: 'border-emerald-200 dark:border-emerald-800/50',
         dot: 'bg-emerald-500',
-        label: 'On Time',
+        label: 'Present',
       };
     case 'late':
+    case 'very_late':
       return {
-        bg: 'bg-amber-500/10 dark:bg-amber-500/20',
-        text: 'text-amber-700 dark:text-amber-400',
-        border: 'border-amber-500/30',
+        bg: 'bg-amber-50/80 dark:bg-amber-950/30',
+        text: 'text-amber-700 dark:text-amber-300',
+        border: 'border-amber-200 dark:border-amber-800/50',
         dot: 'bg-amber-500',
         label: 'Late',
       };
-    case 'very_late':
-      return {
-        bg: 'bg-rose-500/10 dark:bg-rose-500/20',
-        text: 'text-rose-700 dark:text-rose-400',
-        border: 'border-rose-500/30',
-        dot: 'bg-rose-500',
-        label: 'Very Late',
-      };
     case 'half_day':
       return {
-        bg: 'bg-blue-500/10 dark:bg-blue-500/20',
-        text: 'text-blue-700 dark:text-blue-400',
-        border: 'border-blue-500/30',
-        dot: 'bg-blue-500',
+        bg: 'bg-slate-50 dark:bg-slate-850',
+        text: 'text-slate-700 dark:text-slate-300',
+        border: 'border-slate-200 dark:border-slate-750',
+        dot: 'bg-slate-500',
         label: 'Half Day',
       };
     case 'absent':
       return {
-        bg: 'bg-slate-500/10 dark:bg-slate-500/20',
-        text: 'text-slate-700 dark:text-slate-400',
-        border: 'border-slate-500/30',
-        dot: 'bg-slate-500',
+        bg: 'bg-rose-50/80 dark:bg-rose-950/30',
+        text: 'text-rose-700 dark:text-rose-300',
+        border: 'border-rose-200 dark:border-rose-800/50',
+        dot: 'bg-rose-500',
         label: 'Absent',
       };
     case 'on_leave':
+    case 'leave':
       return {
-        bg: 'bg-purple-500/10 dark:bg-purple-500/20',
-        text: 'text-purple-700 dark:text-purple-400',
-        border: 'border-purple-500/30',
-        dot: 'bg-purple-500',
+        bg: 'bg-slate-50 dark:bg-slate-850',
+        text: 'text-slate-700 dark:text-slate-300',
+        border: 'border-slate-200 dark:border-slate-750',
+        dot: 'bg-slate-400',
         label: 'On Leave',
       };
     case 'holiday':
       return {
-        bg: 'bg-teal-500/10 dark:bg-teal-500/20',
-        text: 'text-teal-700 dark:text-teal-400',
-        border: 'border-teal-500/30',
-        dot: 'bg-teal-500',
+        bg: 'bg-slate-50 dark:bg-slate-850',
+        text: 'text-slate-700 dark:text-slate-300',
+        border: 'border-slate-200 dark:border-slate-750',
+        dot: 'bg-slate-400',
         label: 'Holiday',
       };
     default:

@@ -3,12 +3,9 @@ import {
   UserProfile, 
   CompanyRules, 
   Department, 
-  UserRole, 
-  AttendanceStatus,
   AttendanceSummaryStats,
   TeamOverviewStats,
-  AdminOverviewStats,
-  OfficeLocation
+  AdminOverviewStats
 } from '@/types';
 import { calculateCheckInStatus, calculateHoursWorked } from '@/lib/utils/attendance';
 

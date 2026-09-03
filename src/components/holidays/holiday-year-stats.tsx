@@ -182,7 +182,7 @@ export const HolidayYearStats: React.FC<HolidayYearStatsProps> = ({
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 mb-1.5">
             <span className="text-[11px] font-semibold uppercase tracking-wider">Working Days</span>
-            <Briefcase className="w-4 h-4 text-blue-500" />
+            <Briefcase className="w-4 h-4 text-slate-400" />
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl font-black font-mono text-slate-900 dark:text-white">
@@ -190,7 +190,7 @@ export const HolidayYearStats: React.FC<HolidayYearStatsProps> = ({
             </span>
             <span className="text-[11px] font-medium text-slate-400">days</span>
           </div>
-          <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium mt-1">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
             {annualTotals.workingRate}% of the year
           </p>
         </div>
@@ -199,7 +199,7 @@ export const HolidayYearStats: React.FC<HolidayYearStatsProps> = ({
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 mb-1.5">
             <span className="text-[11px] font-semibold uppercase tracking-wider">Official Holidays</span>
-            <Sparkles className="w-4 h-4 text-emerald-500" />
+            <Sparkles className="w-4 h-4 text-slate-400" />
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl font-black font-mono text-slate-900 dark:text-white">
@@ -207,7 +207,7 @@ export const HolidayYearStats: React.FC<HolidayYearStatsProps> = ({
             </span>
             <span className="text-[11px] font-medium text-slate-400">days</span>
           </div>
-          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium mt-1">
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">
             {annualTotals.totalPaidHolidays} Paid · {annualTotals.totalUnpaidHolidays} Unpaid
           </p>
         </div>
@@ -216,7 +216,7 @@ export const HolidayYearStats: React.FC<HolidayYearStatsProps> = ({
         <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
           <div className="flex items-center justify-between text-slate-400 mb-1.5">
             <span className="text-[11px] font-semibold uppercase tracking-wider">Saturdays Off</span>
-            <Calendar className="w-4 h-4 text-rose-500" />
+            <Calendar className="w-4 h-4 text-slate-400" />
           </div>
           <div className="flex items-baseline gap-1.5">
             <span className="text-2xl font-black font-mono text-slate-900 dark:text-white">
@@ -224,7 +224,7 @@ export const HolidayYearStats: React.FC<HolidayYearStatsProps> = ({
             </span>
             <span className="text-[11px] font-medium text-slate-400">Saturdays</span>
           </div>
-          <p className="text-[11px] text-rose-500 font-medium mt-1">Default weekend</p>
+          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-1">Default weekend</p>
         </div>
 
         {/* Calendar Days */}
