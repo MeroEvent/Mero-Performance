@@ -10,10 +10,11 @@ interface AuthContextType {
   user: User | null;
   profile: UserProfile | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ error?: string; role?: UserRole; profile?: UserProfile }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
+
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -24,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
   const supabase = createClient();
 
-  const fetchProfile = async (userId: string, _email?: string) => {
+  const fetchProfile = async (userId: string, _email?: string): Promise<UserProfile | null> => {
     try {
       // First check localStorage cache for offline support (only in browser)
       let cachedProfile: string | null = null;
@@ -53,11 +54,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Error fetching profile:', error);
         // If we have a cached profile, keep using it (offline mode)
         if (cachedProfile) {
-          return;
+          return JSON.parse(cachedProfile);
         }
         // Only clear profile if fetch fails and no cache exists
         setProfile(null);
-        return;
+        return null;
       }
 
       const profileData: UserProfile = {
@@ -88,6 +89,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error('Failed to cache profile:', e);
         }
       }
+
+      return profileData;
     } catch (err) {
       console.error('Error fetching user profile:', err);
       // Try to use cached profile if available (only in browser)
@@ -95,12 +98,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
           const cachedProfile = localStorage.getItem(`user_profile_${userId}`);
           if (cachedProfile) {
-            setProfile(JSON.parse(cachedProfile));
+            const parsed = JSON.parse(cachedProfile);
+            setProfile(parsed);
+            return parsed;
           }
         } catch (e) {
           console.error('Failed to parse cached profile:', e);
         }
       }
+      return null;
     }
   };
 
@@ -144,7 +150,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<{ error?: string; role?: UserRole; profile?: UserProfile }> => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -157,18 +163,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error: error.message };
       }
 
+      let userRole: UserRole = 'staff';
+      let userProfile: UserProfile | null = null;
       if (data.user) {
         setUser(data.user);
-        await fetchProfile(data.user.id, data.user.email);
+        userProfile = await fetchProfile(data.user.id, data.user.email);
+        if (userProfile?.role) {
+          userRole = userProfile.role;
+        }
       }
 
       setIsLoading(false);
-      return {};
+      return { role: userRole, profile: userProfile || undefined };
     } catch (err: any) {
       setIsLoading(false);
       return { error: err.message || 'An unexpected error occurred during sign in.' };
     }
   };
+
 
   const signOut = async () => {
     setIsLoading(true);

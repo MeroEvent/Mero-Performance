@@ -17,12 +17,13 @@ export default function LoginPage() {
   const router = useRouter();
 
   React.useEffect(() => {
-    if (!authLoading && user && profile) {
-      if (profile.role === 'admin') router.push('/admin');
-      else if (profile.role === 'manager') router.push('/manager');
-      else router.push('/employee');
+    // Only redirect if already logged in on page load
+    if (!authLoading && user && profile && !isLoading) {
+      if (profile.role === 'admin') router.replace('/admin');
+      else if (profile.role === 'manager') router.replace('/manager');
+      else router.replace('/employee');
     }
-  }, [user, profile, authLoading, router]);
+  }, [user, profile, authLoading, router, isLoading]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,10 +38,17 @@ export default function LoginPage() {
       return;
     }
 
-    setIsLoading(false);
+    const targetRoute =
+      result.role === 'admin'
+        ? '/admin'
+        : result.role === 'manager'
+        ? '/manager'
+        : '/employee';
+
+    router.replace(targetRoute);
     router.refresh();
-    router.push('/');
   };
+
 
 
   return (
