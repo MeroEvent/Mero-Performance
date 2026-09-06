@@ -333,6 +333,10 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
   const isCheckedIn = !!(todayRecord?.check_in_time && !todayRecord?.check_out_time);
   const isCompletedToday = !!(todayRecord?.check_in_time && todayRecord?.check_out_time);
 
+  const isShortShift = isCompletedToday && (todayRecord?.status === 'absent' || Number(todayRecord?.total_hours || 0) < 2.0);
+  const isHalfDay = isCompletedToday && !isShortShift && (todayRecord?.status === 'half_day' || Number(todayRecord?.total_hours || 0) < 6.0);
+  const isFullShift = isCompletedToday && !isShortShift && !isHalfDay;
+
   // Admin Quick Authorize Network IP
   const [isAuthorizingIp, setIsAuthorizingIp] = useState(false);
   const handleAuthorizeCurrentIp = async () => {
@@ -442,7 +446,11 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
               {isCheckedIn
                 ? 'Session Active'
-                : isCompletedToday
+                : isShortShift
+                ? 'Incomplete Shift'
+                : isHalfDay
+                ? 'Half Day Shift'
+                : isFullShift
                 ? 'Shift Completed'
                 : todayHoliday
                 ? 'Official Holiday'
@@ -468,8 +476,12 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-md">
             {isCheckedIn
               ? 'Your check-in timer is currently active.'
-              : isCompletedToday
-              ? `Checked out at ${formatTime(todayRecord?.check_out_time)}.`
+              : isShortShift
+              ? `Checked out early at ${formatTime(todayRecord?.check_out_time)} (left before half-day threshold).`
+              : isHalfDay
+              ? `Checked out at ${formatTime(todayRecord?.check_out_time)}. Credited as half day.`
+              : isFullShift
+              ? `Checked out at ${formatTime(todayRecord?.check_out_time)}. Full workday completed.`
               : todayHoliday
               ? `Happy ${todayHoliday.name}! Office is closed and punch-in is not required.`
               : isWeekend
@@ -522,25 +534,44 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
             <button
               onClick={triggerCheckOutConfirmation}
               disabled={isLoading}
-              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-rose-600 hover:bg-rose-700 active:scale-95 shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-800"
+              className="group relative w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-red-600 via-rose-600 to-orange-500 hover:from-red-700 hover:to-rose-700 active:scale-95 shadow-2xl shadow-rose-500/40 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-white/20 dark:border-slate-800"
             >
               <div className="flex flex-col items-center justify-center">
-                <LogOut className="w-10 h-10 sm:w-11 sm:h-11 text-white mb-2 group-hover:scale-105 transition-transform duration-200" />
-                <span className="text-base sm:text-lg font-black text-white tracking-wider">CHECK OUT</span>
+                <LogOut className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-1.5 group-hover:scale-105 transition-transform duration-200" />
+                <span className="text-sm sm:text-base font-black text-white tracking-wider">CHECK OUT</span>
               </div>
             </button>
-          ) : isCompletedToday ? (
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
-              <CheckCircle2 className="w-10 h-10 sm:w-11 sm:h-11 text-emerald-400 mb-1.5" />
-              <span className="text-sm font-bold text-white uppercase tracking-wider">Completed</span>
-              <span className="text-[11px] text-slate-300 font-medium mt-0.5 font-mono">
+          ) : isShortShift ? (
+            /* Red: Checkout Before Half Day / Short Shift */
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-rose-600 via-red-600 to-rose-700 text-white shadow-2xl shadow-rose-500/40 p-4 flex flex-col items-center justify-center text-center border-4 border-white/20 dark:border-slate-800">
+              <AlertCircle className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-1.5" />
+              <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Incomplete</span>
+              <span className="text-[11px] text-rose-100 font-medium mt-0.5 font-mono">
+                {Number(todayRecord?.total_hours || 0).toFixed(2)} hrs logged
+              </span>
+            </div>
+          ) : isHalfDay ? (
+            /* Yellow/Amber: Checkout In Half Day */
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-amber-500 via-yellow-500 to-amber-600 text-white shadow-2xl shadow-amber-500/40 p-4 flex flex-col items-center justify-center text-center border-4 border-white/20 dark:border-slate-800">
+              <Clock className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-1.5" />
+              <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Half Day</span>
+              <span className="text-[11px] text-amber-100 font-medium mt-0.5 font-mono">
+                {Number(todayRecord?.total_hours || 0).toFixed(2)} hrs logged
+              </span>
+            </div>
+          ) : isFullShift ? (
+            /* Green: Full Shift Completed */
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-emerald-600 via-teal-600 to-emerald-500 text-white shadow-2xl shadow-emerald-500/40 p-4 flex flex-col items-center justify-center text-center border-4 border-white/20 dark:border-slate-800">
+              <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-1.5" />
+              <span className="text-xs sm:text-sm font-black text-white uppercase tracking-wider">Completed</span>
+              <span className="text-[11px] text-emerald-100 font-medium mt-0.5 font-mono">
                 {Number(todayRecord?.total_hours || 0).toFixed(2)} hrs logged
               </span>
             </div>
           ) : todayHoliday ? (
             /* Holiday Lock Badge */
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
-              <Palmtree className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Palmtree className="w-9 h-9 sm:w-10 sm:h-10 text-slate-300 mb-1.5" />
               <span className="text-sm font-bold text-white uppercase tracking-wider">Holiday</span>
               <span className="text-[11px] text-slate-300 font-medium mt-0.5 line-clamp-1 max-w-[120px]">
                 {todayHoliday.name}
@@ -551,8 +582,8 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
             </div>
           ) : isWeekend ? (
             /* Weekend / Saturday Lock Badge */
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
-              <Coffee className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Coffee className="w-9 h-9 sm:w-10 sm:h-10 text-slate-300 mb-1.5" />
               <span className="text-sm font-bold text-white uppercase tracking-wider">Weekly Off</span>
               <span className="text-[11px] text-slate-300 font-medium mt-0.5">
                 Saturday
@@ -563,8 +594,8 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
             </div>
           ) : approvedLeave ? (
             /* Approved Leave Lock Badge */
-            <div className="w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
-              <Umbrella className="w-10 h-10 sm:w-11 sm:h-11 text-slate-300 mb-1.5" />
+            <div className="w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-slate-900 dark:bg-slate-800 p-4 shadow-sm flex flex-col items-center justify-center text-center border-4 border-slate-100 dark:border-slate-800">
+              <Umbrella className="w-9 h-9 sm:w-10 sm:h-10 text-slate-300 mb-1.5" />
               <span className="text-sm font-bold text-white uppercase tracking-wider">On Leave</span>
               <span className="text-[11px] text-slate-300 font-medium mt-0.5">
                 {approvedLeave.leave_type.toUpperCase()}
@@ -577,14 +608,16 @@ export const CheckInWidget: React.FC<CheckInWidgetProps> = ({ user, onStatusChan
             <button
               onClick={triggerCheckInConfirmation}
               disabled={isLoading}
-              className="group relative w-44 h-44 sm:w-48 sm:h-48 rounded-full bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 active:scale-95 shadow-lg transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-slate-100 dark:border-slate-800"
+              className="group relative w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-700 hover:to-indigo-700 text-white active:scale-95 shadow-2xl shadow-blue-500/40 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer border-4 border-white/20 dark:border-slate-800"
             >
               <div className="flex flex-col items-center justify-center">
-                <LogIn className="w-10 h-10 sm:w-11 sm:h-11 text-white dark:text-slate-900 mb-2 group-hover:scale-105 transition-transform duration-200" />
-                <span className="text-base sm:text-lg font-black tracking-wider">CHECK IN</span>
+                <LogIn className="w-8 h-8 sm:w-10 sm:h-10 text-white mb-1.5 group-hover:scale-105 transition-transform duration-200" />
+                <span className="text-sm sm:text-base font-black text-white tracking-wider">CHECK IN</span>
               </div>
             </button>
           )}
+
+
         </div>
       </div>
 

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">Mero Performance</title>
+  <desc id="desc">A black circular badge with a gold border, a gold ribbon-shaped performance chart, and the words Mero Performance.</desc>
+
+  <defs>
+    <linearGradient id="borderGold" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0" stop-color="#fff500"/>
+      <stop offset="0.48" stop-color="#ffd400"/>
+      <stop offset="1" stop-color="#ffb800"/>
+    </linearGradient>
+
+    <radialGradient id="badgeBlack" cx="50%" cy="38%" r="68%">
+      <stop offset="0" stop-color="#05080c"/>
+      <stop offset="1" stop-color="#010204"/>
+    </radialGradient>
+
+    <linearGradient id="barGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff600"/>
+      <stop offset="0.48" stop-color="#ffc400"/>
+      <stop offset="1" stop-color="#7a4500"/>
+    </linearGradient>
+
+    <linearGradient id="leftPillar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8b5000"/>
+      <stop offset="0.42" stop-color="#ffb800"/>
+      <stop offset="1" stop-color="#fff600"/>
+    </linearGradient>
+
+    <linearGradient id="ribbonGold" x1="0.16" y1="0.08" x2="0.86" y2="0.92">
+      <stop offset="0" stop-color="#fff600"/>
+      <stop offset="0.43" stop-color="#ffc400"/>
+      <stop offset="0.72" stop-color="#ffab00"/>
+      <stop offset="1" stop-color="#d77a00"/>
+    </linearGradient>
+
+    <linearGradient id="ribbonSweep" x1="0.08" y1="0.78" x2="0.92" y2="0.18">
+      <stop offset="0" stop-color="#b46100"/>
+      <stop offset="0.38" stop-color="#f69a00"/>
+      <stop offset="0.72" stop-color="#ffd900"/>
+      <stop offset="1" stop-color="#fff600"/>
+    </linearGradient>
+
+    <clipPath id="badgeClip">
+      <circle cx="512" cy="512" r="471"/>
+    </clipPath>
+  </defs>
+
+  <!-- Transparent outside the badge. -->
+  <circle cx="512" cy="512" r="482" fill="url(#borderGold)"/>
+  <circle cx="512" cy="512" r="461" fill="url(#badgeBlack)"/>
+
+  <g clip-path="url(#badgeClip)">
+    <!-- Rising chart bars behind the ribbon. -->
+    <path d="M537 405a20 20 0 0 1 7-15l44-34c7-5 16 0 16 9v195h-67z" fill="url(#barGold)"/>
+    <path d="M628 334a22 22 0 0 1 8-17l44-32c7-5 17 0 17 9v220l-69 53z" fill="url(#barGold)"/>
+    <path d="M721 264a24 24 0 0 1 9-18l51-40c8-6 20 0 20 11v220l-80 62z" fill="url(#barGold)"/>
+
+    <!-- Rounded return leg on the left. -->
+    <path d="M221 423c0-32 26-58 58-58s57 26 57 58v143c0 32-26 57-57 57-32 0-58-25-58-57z" fill="url(#leftPillar)"/>
+
+    <!-- Main descending ribbon. -->
+    <path d="M221 423c0-52 43-93 100-93 33 0 57 13 80 38l157 162c14 15 29 20 45 12l58 81H501c-17 0-29-7-42-20L296 441c-18-18-39-15-52-3-14 12-23 30-23 51z" fill="url(#ribbonGold)"/>
+
+    <!-- Upward sweep of the ribbon, drawn last to create the folded overlap. -->
+    <path d="M501 623c11-3 24-13 38-24l178-135c28-21 55-44 84-53v80c0 34-15 61-42 83l-47 36c-12 9-30 13-51 13z" fill="url(#ribbonSweep)"/>
+  </g>
+
+  <!-- SVG text remains editable; common fallbacks preserve the geometric sans-serif look. -->
+  <text x="145" y="733" fill="#ffffff" font-family="Montserrat, Arial, Helvetica, sans-serif" font-size="92" font-weight="800" letter-spacing="-5">Mero</text>
+  <text x="394" y="733" fill="#ffffff" font-family="Montserrat, Arial, Helvetica, sans-serif" font-size="88" font-weight="300" letter-spacing="-5">Performance</text>
+</svg>

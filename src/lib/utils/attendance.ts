@@ -192,12 +192,13 @@ export function getStatusBadge(status: AttendanceStatus | string) {
       };
     case 'half_day':
       return {
-        bg: 'bg-slate-50 dark:bg-slate-850',
-        text: 'text-slate-700 dark:text-slate-300',
-        border: 'border-slate-200 dark:border-slate-750',
-        dot: 'bg-slate-500',
+        bg: 'bg-amber-50/80 dark:bg-amber-950/40',
+        text: 'text-amber-700 dark:text-amber-300',
+        border: 'border-amber-200 dark:border-amber-800/50',
+        dot: 'bg-amber-500',
         label: 'Half Day',
       };
+
     case 'absent':
       return {
         bg: 'bg-rose-50/80 dark:bg-rose-950/30',
