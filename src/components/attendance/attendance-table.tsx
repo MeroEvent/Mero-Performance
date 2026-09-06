@@ -236,6 +236,8 @@ export const AttendanceTable: React.FC<AttendanceTableProps> = ({
                         <div className="flex items-center gap-3">
                           <img
                             src={
+                              r.avatar_url ||
+                              r.user_avatar_url ||
                               `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(r.user_name || 'Staff')}`
                             }
                             alt={r.user_name || 'Staff'}

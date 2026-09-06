@@ -89,6 +89,7 @@ export async function GET(req: NextRequest) {
           id,
           name,
           email,
+          avatar_url,
           role,
           department_id,
           position,
@@ -113,6 +114,8 @@ export async function GET(req: NextRequest) {
         ...p,
         user_name: p.user?.name || 'Unknown',
         user_email: p.user?.email || '',
+        avatar_url: p.user?.avatar_url || null,
+        user_avatar_url: p.user?.avatar_url || null,
         department_name: p.user?.department?.name || 'General',
       });
     });
