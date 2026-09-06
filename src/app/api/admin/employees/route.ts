@@ -28,8 +28,25 @@ export async function GET() {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Fetch fallback salaries from company_rules if column is missing
+    const { data: rulesData } = await supabase
+      .from('company_rules')
+      .select('allowed_ips')
+      .limit(1)
+      .maybeSingle();
+
+    const rawIps: string[] = Array.isArray(rulesData?.allowed_ips) ? rulesData.allowed_ips : [];
+    const fallbackSalaries = new Map<string, number>();
+    rawIps.forEach((entry: string) => {
+      if (entry.startsWith('__POLICY__:base_salary_')) {
+        const [k, v] = entry.replace('__POLICY__:base_salary_', '').split('=');
+        if (k && v && !isNaN(Number(v))) fallbackSalaries.set(k, Number(v));
+      }
+    });
+
     const employees = (data || []).map((u: any) => ({
       ...u,
+      base_salary: Number(u.base_salary || fallbackSalaries.get(u.id) || 0),
       department_name: u.department?.name || null,
       shift_name: u.shift?.display_name || null,
     }));
@@ -45,7 +62,7 @@ export async function POST(req: NextRequest) {
   try {
     const supabase = getAdminSupabase();
     const body = await req.json();
-    const { email, password, name, role, department_id, position, phone, shift_id, avatar_url } = body;
+    const { email, password, name, role, department_id, position, phone, shift_id, avatar_url, base_salary } = body;
 
     if (!email || !password || !name) {
       return NextResponse.json(
@@ -67,24 +84,28 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = authData.user.id;
+    const salaryVal = base_salary !== undefined && base_salary !== '' ? Number(base_salary) : 0;
 
-    // 2. Insert into user_profiles table
-    const { data: profileData, error: profileError } = await supabase
+    // 2. Insert into user_profiles table (try with base_salary first)
+    const profilePayload: any = {
+      id: userId,
+      email,
+      name,
+      role: role || 'staff',
+      company_id: 'c0000000-0000-0000-0000-000000000001',
+      department_id: department_id || null,
+      shift_id: shift_id || null,
+      position: position || 'Team Member',
+      phone: phone || null,
+      avatar_url: avatar_url || null,
+      base_salary: salaryVal,
+      is_active: true,
+      join_date: new Date().toISOString().split('T')[0],
+    };
+
+    let { data: profileData, error: profileError } = await supabase
       .from('user_profiles')
-      .upsert({
-        id: userId,
-        email,
-        name,
-        role: role || 'staff',
-        company_id: 'c0000000-0000-0000-0000-000000000001',
-        department_id: department_id || null,
-        shift_id: shift_id || null,
-        position: position || 'Team Member',
-        phone: phone || null,
-        avatar_url: avatar_url || null,
-        is_active: true,
-        join_date: new Date().toISOString().split('T')[0],
-      })
+      .upsert(profilePayload)
       .select(`
         *,
         department:departments(id, name),
@@ -93,8 +114,38 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (profileError) {
-      await supabase.auth.admin.deleteUser(userId);
-      return NextResponse.json({ error: profileError.message }, { status: 500 });
+      // If error is due to base_salary column missing, retry without it
+      delete profilePayload.base_salary;
+      const retryRes = await supabase
+        .from('user_profiles')
+        .upsert(profilePayload)
+        .select(`
+          *,
+          department:departments(id, name),
+          shift:shifts(id, display_name)
+        `)
+        .single();
+
+      if (retryRes.error) {
+        await supabase.auth.admin.deleteUser(userId);
+        return NextResponse.json({ error: retryRes.error.message }, { status: 500 });
+      }
+
+      profileData = retryRes.data;
+
+      // Save salary to company_rules fallback
+      if (salaryVal > 0) {
+        try {
+          const { data: ruleRow } = await supabase.from('company_rules').select('*').limit(1).maybeSingle();
+          if (ruleRow) {
+            const rawIps: string[] = Array.isArray(ruleRow.allowed_ips) ? ruleRow.allowed_ips : [];
+            const prefix = `__POLICY__:base_salary_${userId}=`;
+            const filtered = rawIps.filter((item: string) => !item.startsWith(prefix));
+            filtered.push(`${prefix}${salaryVal}`);
+            await supabase.from('company_rules').update({ allowed_ips: filtered }).eq('id', ruleRow.id);
+          }
+        } catch {}
+      }
     }
 
     return NextResponse.json({ success: true, user: profileData });
@@ -111,7 +162,7 @@ export async function PUT(req: NextRequest) {
   try {
     const supabase = getAdminSupabase();
     const body = await req.json();
-    const { id, password, ...updates } = body;
+    const { id, password, base_salary, ...updates } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
@@ -127,20 +178,28 @@ export async function PUT(req: NextRequest) {
       }
     }
 
+    const salaryVal = base_salary !== undefined && base_salary !== '' ? Number(base_salary) : null;
+
     // Update user profile
-    const { data: profileData, error: profileError } = await supabase
+    const updatePayload: any = {
+      name: updates.name,
+      role: updates.role || 'staff',
+      department_id: updates.department_id || null,
+      shift_id: updates.shift_id || null,
+      position: updates.position || null,
+      phone: updates.phone || null,
+      avatar_url: updates.avatar_url !== undefined ? updates.avatar_url : null,
+      is_active: updates.is_active !== undefined ? updates.is_active : true,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (salaryVal !== null) {
+      updatePayload.base_salary = salaryVal;
+    }
+
+    let { data: profileData, error: profileError } = await supabase
       .from('user_profiles')
-      .update({
-        name: updates.name,
-        role: updates.role || 'staff',
-        department_id: updates.department_id || null,
-        shift_id: updates.shift_id || null,
-        position: updates.position || null,
-        phone: updates.phone || null,
-        avatar_url: updates.avatar_url !== undefined ? updates.avatar_url : null,
-        is_active: updates.is_active !== undefined ? updates.is_active : true,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq('id', id)
       .select(`
         *,
@@ -149,7 +208,38 @@ export async function PUT(req: NextRequest) {
       `)
       .single();
 
-    if (profileError) {
+    if (profileError && salaryVal !== null) {
+      // Column might be missing, try updating without base_salary
+      delete updatePayload.base_salary;
+      const retryRes = await supabase
+        .from('user_profiles')
+        .update(updatePayload)
+        .eq('id', id)
+        .select(`
+          *,
+          department:departments(id, name),
+          shift:shifts(id, display_name)
+        `)
+        .single();
+
+      if (retryRes.error) {
+        return NextResponse.json({ error: retryRes.error.message }, { status: 500 });
+      }
+
+      profileData = retryRes.data;
+
+      // Save salary to company_rules fallback
+      try {
+        const { data: ruleRow } = await supabase.from('company_rules').select('*').limit(1).maybeSingle();
+        if (ruleRow) {
+          const rawIps: string[] = Array.isArray(ruleRow.allowed_ips) ? ruleRow.allowed_ips : [];
+          const prefix = `__POLICY__:base_salary_${id}=`;
+          const filtered = rawIps.filter((item: string) => !item.startsWith(prefix));
+          filtered.push(`${prefix}${salaryVal}`);
+          await supabase.from('company_rules').update({ allowed_ips: filtered }).eq('id', ruleRow.id);
+        }
+      } catch {}
+    } else if (profileError) {
       return NextResponse.json({ error: profileError.message }, { status: 500 });
     }
 

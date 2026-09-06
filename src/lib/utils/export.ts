@@ -383,6 +383,244 @@ export function exportAttendanceToPDF(
   }
 }
 
+/** Exports monthly payroll records to a CSV file. */
+export function exportPayrollToCSV(
+  records: any[],
+  month: number,
+  year: number,
+  filename?: string
+) {
+  if (!records || records.length === 0) {
+    alert('No payroll records available to export.');
+    return;
+  }
+
+  const fname = filename || `Payroll_Sheet_${month}_${year}.csv`;
+  const headers = [
+    'Employee Name',
+    'Email',
+    'Department',
+    'Position',
+    'Base Salary (NPR)',
+    'Working Days',
+    'Days Present',
+    'Approved Leaves',
+    'Unpaid Leaves',
+    'Unauthorized Absences',
+    'Total Hours',
+    'Daily Rate (NPR)',
+    'Deductions (NPR)',
+    'Auto Net (NPR)',
+    'Admin Override (NPR)',
+    'Final Payable (NPR)',
+    'Override Reason',
+    'Status',
+  ];
+
+  const rows = records.map((r) => [
+    `"${(r.employee_name || 'N/A').replace(/"/g, '""')}"`,
+    `"${(r.employee_email || 'N/A').replace(/"/g, '""')}"`,
+    `"${(r.department_name || 'General').replace(/"/g, '""')}"`,
+    `"${(r.position || 'Team Member').replace(/"/g, '""')}"`,
+    r.base_salary || 0,
+    r.working_days || 0,
+    r.days_present || 0,
+    r.approved_leave_days || 0,
+    r.unpaid_leave_days || 0,
+    r.unauthorized_absences || 0,
+    r.total_hours || 0,
+    r.daily_rate || 0,
+    r.deduction_amount || 0,
+    r.net_salary || 0,
+    r.admin_override !== null && r.admin_override !== undefined ? r.admin_override : 'N/A',
+    r.effective_net_salary || r.net_salary || 0,
+    `"${(r.override_reason || '').replace(/"/g, '""')}"`,
+    r.is_finalized ? 'Finalized' : 'Draft',
+  ]);
+
+  const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+  downloadBlob(csvContent, fname, 'text/csv;charset=utf-8;');
+}
+
+/** Generates a printable Salary Payslip PDF for an individual employee. */
+export function exportPayslipToPDF(
+  payroll: any,
+  options?: {
+    institutionName?: string;
+  }
+) {
+  if (!payroll) {
+    alert('No payroll data available for this employee.');
+    return;
+  }
+
+  const companyName = options?.institutionName || 'Mero Company Pvt. Ltd.';
+  const employeeName = payroll.employee_name || 'Employee';
+  const departmentName = payroll.department_name || 'General Department';
+  const position = payroll.position || 'Team Member';
+  const monthNames = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  const monthStr = monthNames[(payroll.month || 1) - 1] || `Month ${payroll.month}`;
+  const year = payroll.year || new Date().getFullYear();
+
+  const baseSalary = Number(payroll.base_salary || 0);
+  const deduction = Number(payroll.deduction_amount || 0);
+  const finalPay = Number(payroll.effective_net_salary ?? payroll.net_salary ?? 0);
+  const hasOverride = payroll.admin_override !== null && payroll.admin_override !== undefined;
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payslip - ${employeeName} - ${monthStr} ${year}</title>
+  <style>
+    @page { size: A4 portrait; margin: 16mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; color: #1e293b; background: #fff; padding: 24px; font-size: 13px; }
+    .slip-container { max-width: 780px; margin: 0 auto; border: 1.5px solid #cbd5e1; border-radius: 12px; overflow: hidden; }
+    .header { padding: 20px 24px; background: #f8fafc; border-bottom: 1.5px solid #cbd5e1; display: flex; justify-content: space-between; align-items: flex-start; }
+    .company-title { font-size: 18px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: -0.5px; }
+    .company-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .slip-title { font-size: 16px; font-weight: 800; color: #0f172a; text-align: right; letter-spacing: -0.3px; }
+    .slip-sub { font-size: 11px; font-weight: 600; color: #475569; text-align: right; margin-top: 2px; }
+    .emp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; padding: 18px 24px; background: #fff; border-bottom: 1px solid #e2e8f0; font-size: 12px; }
+    .emp-field { display: flex; justify-content: space-between; padding-bottom: 4px; border-bottom: 1px dashed #f1f5f9; }
+    .emp-label { color: #64748b; font-weight: 600; }
+    .emp-val { font-weight: 700; color: #0f172a; }
+    .attendance-strip { display: grid; grid-template-columns: repeat(4, 1fr); background: #f1f5f9; border-bottom: 1px solid #cbd5e1; text-align: center; }
+    .att-box { padding: 10px 8px; border-right: 1px solid #e2e8f0; }
+    .att-box:last-child { border-right: none; }
+    .att-num { font-size: 16px; font-weight: 800; font-family: monospace; color: #0f172a; }
+    .att-txt { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-top: 2px; }
+    .tables-split { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1.5px solid #cbd5e1; }
+    .pay-col { padding: 16px 20px; }
+    .pay-col:first-child { border-right: 1px solid #e2e8f0; }
+    .col-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: #0f172a; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; margin-bottom: 10px; }
+    .line-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 12px; }
+    .line-row.bold { font-weight: 700; border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 4px; }
+    .net-banner { padding: 18px 24px; background: #0f172a; color: #fff; display: flex; justify-content: space-between; align-items: center; }
+    .net-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .net-amount { font-size: 24px; font-weight: 900; font-family: monospace; }
+    .note-box { padding: 12px 24px; background: #f8fafc; font-size: 11px; color: #475569; border-bottom: 1px solid #e2e8f0; }
+    .sign-row { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; padding: 36px 30px 24px; background: #fff; }
+    .sign-line { border-top: 1.5px solid #94a3b8; text-align: center; padding-top: 8px; font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; }
+    @media print {
+      body { padding: 0; }
+      .slip-container { border: 1px solid #000; }
+    }
+  </style>
+</head>
+<body>
+  <div class="slip-container">
+    <div class="header">
+      <div>
+        <h1 class="company-title">${companyName}</h1>
+        <p class="company-sub">Bhagwati Marg, Naxal, Kathmandu, Nepal</p>
+        <p class="company-sub">HR & Corporate Operations</p>
+      </div>
+      <div>
+        <div class="slip-title">SALARY PAYSLIP</div>
+        <div class="slip-sub">Period: ${monthStr} ${year}</div>
+      </div>
+    </div>
+
+    <div class="emp-grid">
+      <div class="emp-field"><span class="emp-label">Employee Name:</span><span class="emp-val">${employeeName}</span></div>
+      <div class="emp-field"><span class="emp-label">Department:</span><span class="emp-val">${departmentName}</span></div>
+      <div class="emp-field"><span class="emp-label">Designation:</span><span class="emp-val">${position}</span></div>
+      <div class="emp-field"><span class="emp-label">Payment Mode:</span><span class="emp-val">Direct Bank Transfer</span></div>
+    </div>
+
+    <div class="attendance-strip">
+      <div class="att-box">
+        <div class="att-num">${payroll.working_days || 0}</div>
+        <div class="att-txt">Company Working Days</div>
+      </div>
+      <div class="att-box">
+        <div class="att-num" style="color: #059669;">${payroll.days_present || 0}</div>
+        <div class="att-txt">Days Present</div>
+      </div>
+      <div class="att-box">
+        <div class="att-num" style="color: #2563eb;">${payroll.approved_leave_days || 0}</div>
+        <div class="att-txt">Approved Paid Leaves</div>
+      </div>
+      <div class="att-box">
+        <div class="att-num" style="color: #dc2626;">${payroll.unauthorized_absences || 0}</div>
+        <div class="att-txt">Unauthorized Absences</div>
+      </div>
+    </div>
+
+    <div class="tables-split">
+      <!-- Earnings -->
+      <div class="pay-col">
+        <div class="col-title">Earnings & Compensation</div>
+        <div class="line-row">
+          <span>Monthly Base Salary</span>
+          <span style="font-family: monospace; font-weight: 600;">Rs. ${baseSalary.toLocaleString()}</span>
+        </div>
+        <div class="line-row">
+          <span>Standard Daily Wage Rate</span>
+          <span style="font-family: monospace; font-size: 11px; color: #64748b;">Rs. ${Number(payroll.daily_rate || 0).toLocaleString()} / day</span>
+        </div>
+        <div class="line-row bold">
+          <span>Total Gross Earnings</span>
+          <span style="font-family: monospace;">Rs. ${baseSalary.toLocaleString()}</span>
+        </div>
+      </div>
+
+      <!-- Deductions -->
+      <div class="pay-col">
+        <div class="col-title">Attendance Deductions</div>
+        <div class="line-row">
+          <span>Unauthorized Absence Deduction (${payroll.unauthorized_absences || 0}d)</span>
+          <span style="font-family: monospace; color: #dc2626;">-Rs. ${deduction.toLocaleString()}</span>
+        </div>
+        ${payroll.unpaid_leave_days > 0 ? `
+        <div class="line-row">
+          <span>Unpaid Leaves (${payroll.unpaid_leave_days}d)</span>
+          <span style="font-family: monospace; color: #dc2626;">Deducted</span>
+        </div>` : ''}
+        <div class="line-row bold">
+          <span>Total Deductions</span>
+          <span style="font-family: monospace; color: #dc2626;">-Rs. ${deduction.toLocaleString()}</span>
+        </div>
+      </div>
+    </div>
+
+    ${hasOverride ? `
+    <div class="note-box">
+      <strong>⚠️ Admin Adjustment Note:</strong> ${payroll.override_reason || 'Manual override applied by management.'} (Auto-calculated Net was Rs. ${Number(payroll.net_salary || 0).toLocaleString()})
+    </div>` : ''}
+
+    <div class="net-banner">
+      <div>
+        <div class="net-label">Net Payable Amount</div>
+        <div style="font-size: 11px; opacity: 0.8; margin-top: 2px;">After all attendance adjustments</div>
+      </div>
+      <div class="net-amount">NPR ${finalPay.toLocaleString()}</div>
+    </div>
+
+    <div class="sign-row">
+      <div class="sign-line">Employee Signature & Date</div>
+      <div class="sign-line">Authorized Signatory (HR / Accounts)</div>
+    </div>
+  </div>
+
+  <script>
+    window.onload = function() { window.print(); }
+  </script>
+</body>
+</html>`;
+
+  const printWindow = window.open('', '_blank');
+  if (printWindow) {
+    printWindow.document.write(html);
+    printWindow.document.close();
+  }
+}
+
 /** Helper to download a blob as a file. */
 function downloadBlob(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });

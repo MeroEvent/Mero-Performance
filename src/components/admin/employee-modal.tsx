@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '@/components/ui/modal';
 import { Button } from '@/components/ui/button';
-import { Upload, User, X, Key, Shield, Building, Clock, Briefcase, Phone, Mail } from 'lucide-react';
+import { Upload, User, X, Key, Shield, Building, Clock, Briefcase, Phone, Mail, Banknote } from 'lucide-react';
 
 interface EmployeeModalProps {
   isOpen: boolean;
@@ -27,6 +27,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
     shift_id: '',
     position: '',
     phone: '',
+    base_salary: '',
     avatar_url: '',
   });
 
@@ -64,6 +65,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
         shift_id: employeeToEdit.shift_id || '',
         position: employeeToEdit.position || '',
         phone: employeeToEdit.phone || '',
+        base_salary: employeeToEdit.base_salary !== undefined && employeeToEdit.base_salary !== null ? String(employeeToEdit.base_salary) : '',
         avatar_url: employeeToEdit.avatar_url || '',
       });
       setAvatarPreview(employeeToEdit.avatar_url || '');
@@ -77,6 +79,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
         shift_id: '',
         position: '',
         phone: '',
+        base_salary: '',
         avatar_url: '',
       });
       setAvatarPreview('');
@@ -378,20 +381,40 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
           </div>
         </div>
 
-        {/* Phone Number */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-            Phone Number <span className="text-slate-400 font-normal">(Optional)</span>
-          </label>
-          <div className="relative">
-            <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              placeholder="e.g. +977 9801234567"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="w-full pl-9 pr-3.5 py-2.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-slate-100"
-            />
+        {/* Base Monthly Salary & Phone Number */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Monthly Base Salary <span className="text-slate-400 font-normal">(in Rs.)</span>
+            </label>
+            <div className="relative">
+              <Banknote className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="number"
+                min="0"
+                step="100"
+                placeholder="e.g. 35000"
+                value={formData.base_salary}
+                onChange={(e) => setFormData({ ...formData, base_salary: e.target.value })}
+                className="w-full pl-9 pr-3.5 py-2.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white text-slate-900 dark:text-slate-100 font-mono font-bold"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+              Phone Number <span className="text-slate-400 font-normal">(Optional)</span>
+            </label>
+            <div className="relative">
+              <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder="e.g. +977 9801234567"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="w-full pl-9 pr-3.5 py-2.5 text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-slate-900 dark:focus:ring-white text-slate-900 dark:text-slate-100"
+              />
+            </div>
           </div>
         </div>
 

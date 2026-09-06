@@ -20,7 +20,8 @@ import {
   Smartphone,
   Wifi,
   MapPin,
-  ShieldAlert
+  ShieldAlert,
+  Banknote
 } from 'lucide-react';
 import { clsx } from 'clsx';
 
@@ -76,6 +77,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ role, isOpenMobile = false, on
         { href: '/admin/holidays', label: 'Holiday Calendar', icon: Calendar },
         { href: '/reports', label: 'Attendance & Logs', icon: FileText },
         { href: '/manager/leave', label: 'Leave Management', icon: Calendar },
+        { href: '/admin/salary', label: 'Salary & Payroll', icon: Banknote },
       ],
     },
     {
