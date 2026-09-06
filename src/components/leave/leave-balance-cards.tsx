@@ -3,7 +3,7 @@
 import React from 'react';
 import { LeaveBalance, LeaveTypeConfig } from '@/types';
 import { Card } from '@/components/ui/card';
-import { HeartPulse, Calendar, Palmtree, AlertCircle, Home, Clock } from 'lucide-react';
+import { HeartPulse, Calendar, Palmtree, AlertCircle, Home, Clock, Flame } from 'lucide-react';
 
 interface LeaveBalanceCardsProps {
   balances: LeaveBalance[];
@@ -14,23 +14,25 @@ export const LeaveBalanceCards: React.FC<LeaveBalanceCardsProps> = ({ balances, 
   const getIcon = (type: string) => {
     switch (type) {
       case 'sick':
-        return <HeartPulse className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
+        return <HeartPulse className="w-5 h-5 text-rose-600 dark:text-rose-400" />;
+      case 'mourning':
+        return <Flame className="w-5 h-5 text-purple-600 dark:text-purple-400" />;
       case 'casual':
-        return <Calendar className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
+        return <Calendar className="w-5 h-5 text-amber-600 dark:text-amber-400" />;
       case 'vacation':
-        return <Palmtree className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
+        return <Palmtree className="w-5 h-5 text-blue-600 dark:text-blue-400" />;
       case 'unpaid':
         return <AlertCircle className="w-5 h-5 text-slate-400" />;
       case 'wfh':
-        return <Home className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
+        return <Home className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />;
       case 'comp_off':
       default:
-        return <Clock className="w-5 h-5 text-slate-700 dark:text-slate-300" />;
+        return <Clock className="w-5 h-5 text-teal-600 dark:text-teal-400" />;
     }
   };
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {leaveTypes.map((config) => {
         const bal = balances.find((b) => b.leave_type === config.type) || {
           total_quota: config.annual_quota,
@@ -57,7 +59,7 @@ export const LeaveBalanceCards: React.FC<LeaveBalanceCardsProps> = ({ balances, 
                   {config.type === 'unpaid' ? '∞' : bal.remaining}
                 </span>
                 {config.type !== 'unpaid' && (
-                  <span className="text-xs text-slate-400">
+                  <span className="text-xs text-slate-400 font-medium">
                     of {bal.total_quota} days
                   </span>
                 )}
@@ -71,6 +73,12 @@ export const LeaveBalanceCards: React.FC<LeaveBalanceCardsProps> = ({ balances, 
                     style={{ width: `${pct}%` }}
                   />
                 </div>
+              )}
+
+              {config.description && (
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 truncate" title={config.description}>
+                  {config.description}
+                </p>
               )}
             </div>
           </Card>

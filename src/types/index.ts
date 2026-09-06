@@ -2,7 +2,7 @@ export type UserRole = 'admin' | 'manager' | 'staff';
 
 export type AttendanceStatus = 'on_time' | 'late' | 'very_late' | 'absent' | 'half_day' | 'on_leave' | 'holiday';
 
-export type LeaveType = 'sick' | 'casual' | 'vacation' | 'unpaid' | 'wfh' | 'comp_off';
+export type LeaveType = 'sick' | 'casual' | 'vacation' | 'unpaid' | 'wfh' | 'comp_off' | 'mourning';
 
 export type LeaveStatus = 'pending' | 'approved' | 'rejected' | 'cancelled';
 
@@ -79,12 +79,15 @@ export interface CompanyRules {
   auto_checkout_enabled?: boolean;
   auto_checkout_buffer_minutes?: number;
   auto_checkout_penalty_status?: 'absent' | 'half_day' | 'standard';
-  // Leave Quotas (Annual days per employee)
+  // Leave Quotas (Annual days per employee / Nepal Labour Act 2074)
   casual_leave_quota?: number;
   sick_leave_quota?: number;
   annual_leave_quota?: number;
-  maternity_leave_quota?: number;
+  home_leave_accrual_days?: number;
+  mourning_leave_quota?: number;
   comp_off_quota?: number;
+  lwp_quota?: number;
+  maternity_leave_quota?: number;
   max_carry_over_days?: number;
   // Payroll & Overtime Rules
   standard_working_days_per_month?: number;
@@ -144,6 +147,8 @@ export interface AttendanceRecord {
   edit_reason?: string | null;
   user_name?: string;
   user_email?: string;
+  avatar_url?: string | null;
+  user_avatar_url?: string | null;
   department_name?: string;
   shift_name?: string | null;
   created_at: string;

@@ -107,7 +107,7 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
           >
             {leaveTypes.map((t) => (
               <option key={t.type} value={t.type}>
-                {t.label} ({t.description})
+                {t.label}
               </option>
             ))}
           </select>
